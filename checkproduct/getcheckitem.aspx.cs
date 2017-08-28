@@ -20,7 +20,33 @@ namespace checkproduct
                 {
                     id = "1",
                     content = "这是一段测试文本",
-                    files = new String[2]{ "file1", "file2"}
+                    files = new String[2]{ "file1", "file2"},
+                    checkResult = new {
+                       images = new String[] {
+
+                           "animal.jpg",
+                           "dog.jpg",
+                           "test.jpg",
+                            "test.jpg",
+                           "test.jpg",
+                           "test.jpg",
+                            "test.jpg",
+                           "test.jpg",
+                           "test.jpg",
+                            "dog.jpg",
+                           "test.jpg",
+                           "test.jpg",
+                            "test.jpg",
+                           "test.jpg",
+                           "test.jpg",
+                            "test.jpg",
+                           "test.jpg",
+                           "test.jpg",
+                            "test.jpg",
+                           "test.jpg",
+                           "test.jpg",
+                        }
+                   }
                 }
             };
             Response.Write(JsonConvert.SerializeObject(resp));

@@ -15,10 +15,11 @@ namespace checkproduct
             var resp = new
             {
                 status = 0,
-                errorMessage = "",
+                errorMessage = "用户名或密码错误",
                 user = new
                 {
-                    name = "jhjin",
+                    username = "jhjin",
+                    name = "金",
                     department = "it"
                 }
             };
