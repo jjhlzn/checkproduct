@@ -10,52 +10,52 @@
   </PropertyGroup>
   <ItemGroup>
     <File Include="bin/checkproduct.dll">
-      <publishTime>07/19/2017 10:19:46</publishTime>
+      <publishTime>09/03/2017 21:37:07</publishTime>
     </File>
     <File Include="bin/log4net.dll">
-      <publishTime>12/16/2016 15:40:22</publishTime>
+      <publishTime>08/16/2017 16:44:01</publishTime>
     </File>
     <File Include="bin/Newtonsoft.Json.dll">
-      <publishTime>12/16/2016 15:40:22</publishTime>
+      <publishTime>06/18/2017 13:57:10</publishTime>
     </File>
     <File Include="checkproduct.aspx">
-      <publishTime>07/09/2017 14:14:18</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="getcheckfile.aspx">
-      <publishTime>07/09/2017 20:39:39</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="getcheckimages.aspx">
-      <publishTime>07/13/2017 09:04:27</publishTime>
+      <publishTime>08/28/2017 23:02:24</publishTime>
     </File>
     <File Include="getcheckitem.aspx">
-      <publishTime>07/09/2017 19:55:58</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="getchecklist.aspx">
-      <publishTime>07/12/2017 16:37:04</publishTime>
+      <publishTime>08/28/2017 23:02:24</publishTime>
     </File>
     <File Include="getnotchecklist.aspx">
-      <publishTime>07/10/2017 17:09:46</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="index.html">
-      <publishTime>07/07/2017 15:53:55</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="log4net.config">
-      <publishTime>07/08/2017 08:54:33</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="login.aspx">
-      <publishTime>07/07/2017 16:15:20</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="test.aspx">
-      <publishTime>07/11/2017 17:22:46</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="upload.aspx">
-      <publishTime>07/08/2017 09:40:14</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="upload1.aspx">
-      <publishTime>07/08/2017 10:55:16</publishTime>
+      <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>07/12/2017 16:27:49</publishTime>
+      <publishTime>08/28/2017 21:46:02</publishTime>
     </File>
   </ItemGroup>
 </Project>

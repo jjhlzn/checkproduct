@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using Newtonsoft.Json;
 
+
 namespace checkproduct
 {
     public partial class getnotchecklist : System.Web.UI.Page
@@ -16,22 +17,56 @@ namespace checkproduct
             {
                 status = 0,
                 errorMessage = "",
+                totalCount = 6,
                 items = new Object[] {
 
                     new {
-                        id = "1",
-                        title = "验货单1",
-                        content = "这是一段测试文本"
+                        ticketNo = "123456789a",  
+                        inHourseNo = "abcd123",
+                        tracker = "张三",
+                        checker = "小周",
+                        outDate = "2017-10-01",
+                        status = "未验货"
                     },
                     new {
-                        id = "2",
-                        title = "验货单2",
-                        content = "这是一段测试文本"
+                        ticketNo = "123456789b",
+                        inHourseNo = "abcd124",
+                        tracker = "张三",
+                        checker = "未知",
+                        outDate = "2017-10-20",
+                        status = "未分配"
                     },
                     new {
-                        id = "3",
-                        title = "验货单3",
-                        content = "这是一段测试文本"
+                        ticketNo = "123456789c",
+                        inHourseNo = "abcd125",
+                        tracker = "张三",
+                        checker = "小周",
+                        outDate = "2017-10-01",
+                        status = "未验货"
+                    },
+                    new {
+                        ticketNo = "123456789d",
+                        inHourseNo = "abcd126",
+                        tracker = "张三",
+                        checker = "小李飞刀",
+                        outDate = "2017-10-11",
+                        status = "未验货"
+                    },
+                    new {
+                        ticketNo = "123456789e",
+                        inHourseNo = "abcd125",
+                        tracker = "乔峰",
+                        checker = "李寻欢",
+                        outDate = "2017-10-01",
+                        status = "未验货"
+                    },
+                    new {
+                        ticketNo = "123456789f",
+                        inHourseNo = "abcd126",
+                        tracker = "段誉",
+                        checker = "张三丰",
+                        outDate = "2017-10-11",
+                        status = "未验货"
                     },
                 }
             };

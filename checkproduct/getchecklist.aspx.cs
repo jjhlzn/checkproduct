@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace checkproduct
 {
@@ -12,27 +13,61 @@ namespace checkproduct
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            //System.Threading.Thread.Sleep(2000);
             var resp = new
             {
+                status = 0,
+                errorMessage = "",
+                totalCount = 6,
                 items = new Object[] {
 
                     new {
-                        id = "1",
-                        title = "已验货单1",
-                        content = "这是一段测试文本",
-                        checkResult = true
+                        ticketNo = "123456789a",
+                        inHourseNo = "abcd123",
+                        tracker = "张三",
+                        checker = "小周",
+                        outDate = "2017-10-01",
+                        status = "已验货"
                     },
                     new {
-                        id = "2",
-                        title = "已验货单2",
-                        content = "这是一段测试文本",
-                        checkResult = false
+                        ticketNo = "123456789b",
+                        inHourseNo = "abcd124",
+                        tracker = "张三",
+                        checker = "未知",
+                        outDate = "2017-10-20",
+                        status = "已验货"
                     },
                     new {
-                        id = "3",
-                        title = "已验货单3",
-                        content = "这是一段测试文本",
-                        checkResult = true
+                        ticketNo = "123456789c",
+                        inHourseNo = "abcd125",
+                        tracker = "张三",
+                        checker = "小周",
+                        outDate = "2017-10-01",
+                        status = "已验货"
+                    },
+                    new {
+                        ticketNo = "123456789d",
+                        inHourseNo = "abcd126",
+                        tracker = "张三",
+                        checker = "小李飞刀",
+                        outDate = "2017-10-11",
+                        status = "已验货"
+                    },
+                     new {
+                        ticketNo = "123456789e",
+                        inHourseNo = "abcd126",
+                        tracker = "张三",
+                        checker = "XXX",
+                        outDate = "2017-10-11",
+                        status = "已验货"
+                    },
+                    new {
+                        ticketNo = "123456789f",
+                        inHourseNo = "abcd126",
+                        tracker = "张三",
+                        checker = "YYY",
+                        outDate = "2017-10-11",
+                        status = "已验货"
                     },
                 }
             };
