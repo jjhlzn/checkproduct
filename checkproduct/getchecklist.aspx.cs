@@ -39,11 +39,13 @@ namespace checkproduct
             logger.Debug("pageNo = " + req.pageNo + ", pageSize = " + req.pageSize );
 
             Object[] data = new Object[req.pageSize];
+
+            
             for (int i = 0; i < req.pageSize; i++)
             {
                 data[i] = makeCheckItem(req.pageNo * req.pageSize + i); 
             }
-            System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(500); 
             var resp = new
             {
                 status = 0,
