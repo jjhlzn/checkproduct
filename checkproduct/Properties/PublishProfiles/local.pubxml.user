@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <File Include="bin/checkproduct.dll">
-      <publishTime>09/03/2017 21:37:07</publishTime>
+      <publishTime>09/11/2017 18:27:46</publishTime>
     </File>
     <File Include="bin/log4net.dll">
       <publishTime>08/16/2017 16:44:01</publishTime>

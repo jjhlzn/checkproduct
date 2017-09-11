@@ -91,33 +91,46 @@ namespace checkproduct
                             {
                                 new
                                 {
-                                     title = "客户货号",
-                                    value = "888888888"
+                                    code = "khhh",
+                                    title = "客户货号",
+                                    value = "888888888",
+                                    canEdit = false
                                 },
                                 new
                                 {
+                                    code = "wshh",
                                      title = "我司货号",
-                                    value = "999999999"
+                                    value = "999999999",
+                                    canEdit = false
                                 },
                                 new
                                 {
+                                    code = "cxs",
                                      title = "抽箱数",
-                                    value = "10"
+                                    value = "10",
+                                    canEdit = true
                                 },
                                 new
                                 {
+                                    code = "wxcj",
                                      title = "外箱尺寸",
-                                    value = "100"
+                                    value = "100",
+                                    canEdit = true
+                              
                                 },
                                 new
                                 {
+                                    code = "djmz",
                                      title = "单件毛重",
-                                    value = "10kg"
+                                    value = "10kg",
+                                    canEdit = true
                                 },
                                 new
                                 {
+                                    code = "djjz",
                                      title = "单件净重",
-                                    value = "9kg"
+                                    value = "9kg",
+                                    canEdit = true
                                 }
                               }
                         },
@@ -131,73 +144,97 @@ namespace checkproduct
                             {
                                 new
                                 {
+                                    code = "khhh",
                                      title = "客户货号",
-                                    value = "888888888"
+                                    value = "888888888",
+                                    canEdit = false
                                 },
                                 new
                                 {
+                                    code = "wshh",
                                      title = "我司货号",
-                                    value = "999999999"
+                                    value = "999999999",
+                                    canEdit = false
                                 },
                                 new
                                 {
+                                     code = "cxs",
                                      title = "抽箱数",
-                                    value = "10"
+                                    value = "10",
+                                    canEdit = true
                                 },
                                 new
                                 {
+                                    code = "wxcj",
                                      title = "外箱尺寸",
-                                    value = "100"
+                                    value = "100",
+                                     canEdit = true
                                 },
                                 new
                                 {
+                                    code = "djmz",
                                      title = "单件毛重",
-                                    value = "10kg"
+                                    value = "10kg",
+                                     canEdit = true
                                 },
                                 new
                                 {
+                                     code = "djjz",
                                      title = "单件净重",
-                                    value = "9kg"
+                                    value = "9kg",
+                                     canEdit = true
                                 }
                               }
                         },
                         new
                         {
-                            id = "C",
+                            id = "3",
                             name = "商品C",
                             productNo = "777777777",
-                             checkResult = "未验货",
+                             checkResult = "待验货",
                              properties = new []
                             {
                                 new
                                 {
+                                     code = "khhh",
                                      title = "客户货号",
-                                    value = "888888888"
+                                    value = "888888888",
+                                    canEdit = false
                                 },
                                 new
                                 {
+                                    code = "wshh",
                                      title = "我司货号",
-                                    value = "999999999"
+                                    value = "999999999",
+                                    canEdit = false
                                 },
                                 new
                                 {
+                                    code = "cxs",
                                      title = "抽箱数",
-                                    value = "10"
+                                    value = "10",
+                                    canEdit = true
                                 },
                                 new
                                 {
+                                     code = "wxcj",
                                      title = "外箱尺寸",
-                                    value = "100"
+                                    value = "100",
+                                    canEdit = true
                                 },
                                 new
                                 {
+                                     code = "djmz",
                                      title = "单件毛重",
-                                    value = "10kg"
+                                    value = "10kg",
+                                    canEdit = true
                                 },
                                 new
                                 {
+                                     code = "djjz",
                                      title = "单件净重",
-                                    value = "9kg"
+                                    value = "9kg",
+                                    canEdit = true
                                 }
                               }
                         },
