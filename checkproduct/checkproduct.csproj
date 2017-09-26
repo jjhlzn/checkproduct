@@ -80,6 +80,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BasePage.cs" />
     <Compile Include="checkproduct.aspx.cs">
       <DependentUpon>checkproduct.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -103,14 +104,12 @@
     </Compile>
     <Compile Include="getcheckitem.aspx.cs">
       <DependentUpon>getcheckitem.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="getcheckitem.aspx.designer.cs">
       <DependentUpon>getcheckitem.aspx</DependentUpon>
     </Compile>
     <Compile Include="getchecklist.aspx.cs">
       <DependentUpon>getchecklist.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="getnotchecklist.aspx.cs">
       <DependentUpon>getnotchecklist.aspx</DependentUpon>
@@ -121,7 +120,6 @@
     </Compile>
     <Compile Include="login.aspx.cs">
       <DependentUpon>login.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="login.aspx.designer.cs">
       <DependentUpon>login.aspx</DependentUpon>

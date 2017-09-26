@@ -5,12 +5,30 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Newtonsoft.Json;
+using log4net;
 
 namespace checkproduct
 {
-    public partial class login : System.Web.UI.Page
+    public class LoginRequest : BaseRequest
     {
-        protected void Page_Load(object sender, EventArgs e)
+        public string a
+        {
+            get;
+            set;
+        }
+
+        public string b
+        {
+            get;
+            set;
+        }
+    }
+
+    public partial class login : BasePage<LoginRequest>
+    {
+        private ILog logger = LogManager.GetLogger(typeof(login));
+
+        protected override Object handle(LoginRequest req)
         {
             var resp = new
             {
@@ -23,8 +41,9 @@ namespace checkproduct
                     department = "it"
                 }
             };
-            Response.Write(JsonConvert.SerializeObject(resp));
-            Response.End();
+
+            return resp;
         }
+
     }
 }

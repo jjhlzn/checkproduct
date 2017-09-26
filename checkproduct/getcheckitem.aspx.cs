@@ -8,9 +8,18 @@ using Newtonsoft.Json;
 
 namespace checkproduct
 {
-    public partial class getcheckitem : System.Web.UI.Page
+    public class GetCheckItemRequest : BaseRequest
     {
-        protected void Page_Load(object sender, EventArgs e)
+        public string ticketNo
+        {
+            get;
+            set;
+        }
+    }
+
+    public partial class getcheckitem : BasePage<GetCheckItemRequest>
+    {
+        protected override object handle(GetCheckItemRequest req)
         {
             var resp = new
             {
@@ -20,8 +29,8 @@ namespace checkproduct
                 {
                     id = "1",
                     content = "这是一段测试文本",
-                    files = new String[2]{ "file1", "file2"},
-                    properties = new []
+                    files = new String[2] { "file1", "file2" },
+                    properties = new[]
                     {
                         new
                         {
@@ -48,39 +57,8 @@ namespace checkproduct
                              title = "预计出货日期",
                             value = "2017-11-12"
                         },
-                        /*
-                        new
-                        {
-                             title = "客户货号",
-                            value = "888888888"
-                        },
-                        new
-                        {
-                             title = "我司货号",
-                            value = "999999999"
-                        },
-                        new
-                        {
-                             title = "抽箱数",
-                            value = "10"
-                        },
-                        new
-                        {
-                             title = "外箱尺寸",
-                            value = "100"
-                        },
-                        new
-                        {
-                             title = "单件毛重",
-                            value = "10kg"
-                        },
-                        new
-                        {
-                             title = "单件净重",
-                            value = "9kg"
-                        } */
                     },
-                    products = new [] {
+                    products = new[] {
                         new
                         {
                             id = "1",
@@ -116,7 +94,7 @@ namespace checkproduct
                                      title = "外箱尺寸",
                                     value = "100",
                                     canEdit = true
-                              
+
                                 },
                                 new
                                 {
@@ -239,9 +217,10 @@ namespace checkproduct
                               }
                         },
                     },
-            
-                    checkResult = new {
-                       images = new String[] {
+
+                    checkResult = new
+                    {
+                        images = new String[] {
 
                            "animal.jpg",
                            "dog.jpg",
@@ -265,11 +244,12 @@ namespace checkproduct
                            "test.jpg",
                            "test.jpg",
                         }
-                   }
+                    }
                 }
             };
-            Response.Write(JsonConvert.SerializeObject(resp));
-            Response.End();
+
+            return resp;
         }
+
     }
 }

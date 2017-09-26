@@ -10,54 +10,74 @@ using System.Threading;
 
 namespace checkproduct
 {
-    public partial class getchecklist : System.Web.UI.Page
+    public class GetCheckListRequest : BaseRequest
+    {
+        public String startDate
+        {
+            get;
+            set;
+        }
+
+        public String endDate
+        {
+            set;
+            get;
+        }
+
+        public String ticketNo
+        {
+            set;
+            get;
+        }
+
+        public bool hasChecked
+        {
+            set;
+            get;
+        }
+
+
+        public int pageNo
+        {
+            get;
+            set;
+        }
+
+        public int pageSize
+        {
+            get;
+            set;
+        }
+
+    }
+
+
+    public partial class getchecklist : BasePage<GetCheckListRequest>
     {
         private ILog logger = LogManager.GetLogger(typeof(getchecklist));
 
-        class GetCheckListRequest
+
+        protected override Object handle(GetCheckListRequest req)
         {
-            public int pageNo
-            {
-                get;
-                set;
-            }
-
-            public int pageSize
-            {
-                get;
-                set;
-            }
-
-
-        }
-
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            String requestJson = Request.Params["request"];
-            GetCheckListRequest req = JsonConvert.DeserializeObject<GetCheckListRequest>(requestJson);
-            logger.Debug("requestJson:" + requestJson);
-            logger.Debug("pageNo = " + req.pageNo + ", pageSize = " + req.pageSize );
-
             Object[] data = new Object[req.pageSize];
 
-            
+
             for (int i = 0; i < req.pageSize; i++)
             {
-                data[i] = makeCheckItem(req.pageNo * req.pageSize + i); 
+                data[i] = makeCheckItem(req.pageNo * req.pageSize + i);
             }
-            System.Threading.Thread.Sleep(500); 
+            System.Threading.Thread.Sleep(500);
             var resp = new
             {
                 status = 0,
                 errorMessage = "",
                 totalCount = 20,
                 items = data
-                
-            };
-            Response.Write(JsonConvert.SerializeObject(resp));
-            Response.End();
-        }
 
+            };
+
+            return resp;
+        }
 
         private Object makeCheckItem(int i)
         {
