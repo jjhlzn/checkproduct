@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <File Include="bin/checkproduct.dll">
-      <publishTime>09/11/2017 18:28:56</publishTime>
+      <publishTime>10/02/2017 14:57:17</publishTime>
     </File>
     <File Include="bin/log4net.dll">
       <publishTime>08/16/2017 16:44:01</publishTime>
@@ -21,6 +21,9 @@
     <File Include="checkproduct.aspx">
       <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
+    <File Include="data.txt">
+      <publishTime>10/02/2017 14:56:31</publishTime>
+    </File>
     <File Include="getcheckfile.aspx">
       <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
@@ -30,11 +33,20 @@
     <File Include="getcheckitem.aspx">
       <publishTime>08/16/2017 16:33:42</publishTime>
     </File>
+    <File Include="getcheckitemresult.aspx">
+      <publishTime>09/27/2017 08:57:39</publishTime>
+    </File>
     <File Include="getchecklist.aspx">
       <publishTime>08/28/2017 23:02:24</publishTime>
     </File>
     <File Include="getnotchecklist.aspx">
       <publishTime>08/16/2017 16:33:42</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>10/02/2017 08:58:16</publishTime>
+    </File>
+    <File Include="handleHttpsRegister.aspx">
+      <publishTime>10/02/2017 09:06:57</publishTime>
     </File>
     <File Include="index.html">
       <publishTime>08/16/2017 16:33:42</publishTime>

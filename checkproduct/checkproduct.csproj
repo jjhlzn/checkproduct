@@ -67,11 +67,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="checkproduct.aspx" />
+    <Content Include="data.txt" />
     <Content Include="getcheckfile.aspx" />
     <Content Include="getcheckimages.aspx" />
     <Content Include="getcheckitem.aspx" />
+    <Content Include="getcheckitemresult.aspx" />
     <Content Include="getchecklist.aspx" />
     <Content Include="getnotchecklist.aspx" />
+    <Content Include="Global.asax" />
+    <Content Include="handleHttpsRegister.aspx" />
     <Content Include="index.html" />
     <Content Include="login.aspx" />
     <Content Include="test.aspx" />
@@ -108,6 +112,12 @@
     <Compile Include="getcheckitem.aspx.designer.cs">
       <DependentUpon>getcheckitem.aspx</DependentUpon>
     </Compile>
+    <Compile Include="getcheckitemresult.aspx.cs">
+      <DependentUpon>getcheckitemresult.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="getcheckitemresult.aspx.designer.cs">
+      <DependentUpon>getcheckitemresult.aspx</DependentUpon>
+    </Compile>
     <Compile Include="getchecklist.aspx.cs">
       <DependentUpon>getchecklist.aspx</DependentUpon>
     </Compile>
@@ -117,6 +127,16 @@
     </Compile>
     <Compile Include="getnotchecklist.aspx.designer.cs">
       <DependentUpon>getnotchecklist.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="handleHttpsRegister.aspx.cs">
+      <DependentUpon>handleHttpsRegister.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="handleHttpsRegister.aspx.designer.cs">
+      <DependentUpon>handleHttpsRegister.aspx</DependentUpon>
     </Compile>
     <Compile Include="login.aspx.cs">
       <DependentUpon>login.aspx</DependentUpon>
