@@ -220,6 +220,8 @@ namespace checkproduct
 
                     checkResult = new
                     {
+                        result = "完成",
+                        description = "这是验货说明",
                         images = new String[] {
 
                            "animal.jpg",

@@ -27,7 +27,7 @@ namespace checkproduct
                 errorMessage = "",
                 result = new
                 {
-                    result = "0",
+                    result = "完成",
                     description = "这是一条验货描述",
                     images = new[]
                                     {
