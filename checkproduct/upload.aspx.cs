@@ -51,7 +51,6 @@ namespace checkproduct
                 String newFileName = DateTime.Now.Ticks + myFile.FileName;
                 try
                 {
-                    
                     myFile.SaveAs(Path.Combine(pathForSaving, newFileName));
                     return newFileName;
                 }

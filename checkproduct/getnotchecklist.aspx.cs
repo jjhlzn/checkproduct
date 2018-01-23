@@ -21,7 +21,7 @@ namespace checkproduct
                 items = new Object[] {
 
                     new {
-                        ticketNo = "123456789a",  
+                        ticketNo = "HW17133",  
                         inHourseNo = "abcd123",
                         tracker = "张三",
                         checker = "小周",
@@ -29,7 +29,7 @@ namespace checkproduct
                         status = "未验货"
                     },
                     new {
-                        ticketNo = "123456789b",
+                        ticketNo = "HW17134",
                         inHourseNo = "abcd124",
                         tracker = "张三",
                         checker = "未知",
@@ -37,7 +37,7 @@ namespace checkproduct
                         status = "未分配"
                     },
                     new {
-                        ticketNo = "123456789c",
+                        ticketNo = "HW17135",
                         inHourseNo = "abcd125",
                         tracker = "张三",
                         checker = "小周",
@@ -45,7 +45,7 @@ namespace checkproduct
                         status = "未验货"
                     },
                     new {
-                        ticketNo = "123456789d",
+                        ticketNo = "HW17136",
                         inHourseNo = "abcd126",
                         tracker = "张三",
                         checker = "小李飞刀",
@@ -53,7 +53,7 @@ namespace checkproduct
                         status = "未验货"
                     },
                     new {
-                        ticketNo = "123456789e",
+                        ticketNo = "HW17137",
                         inHourseNo = "abcd125",
                         tracker = "乔峰",
                         checker = "李寻欢",
@@ -61,7 +61,7 @@ namespace checkproduct
                         status = "未验货"
                     },
                     new {
-                        ticketNo = "123456789f",
+                        ticketNo = "HW17138",
                         inHourseNo = "abcd126",
                         tracker = "段誉",
                         checker = "张三丰",
