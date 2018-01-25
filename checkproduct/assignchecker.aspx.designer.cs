@@ -11,7 +11,7 @@ namespace checkproduct
 {
 
 
-    public partial class handleHttpsRegister
+    public partial class assignchecker
     {
 
         /// <summary>

@@ -55,5 +55,15 @@ namespace checkproduct.Service
                 return user;
             }
         }
+
+        public List<User> GetAllCheckers()
+        {
+            string sql = @"select e_no as username, name from rs_employee where e_no in (select o_no from t_operator_role_base where role_no = 'yhy')";
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                var checkers = conn.Query<User>(sql);
+                return checkers.AsList<User>();
+            }
+        }
     }
 }

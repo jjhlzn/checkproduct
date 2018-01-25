@@ -70,16 +70,21 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assignchecker.aspx" />
     <Content Include="checkproduct.aspx" />
     <Content Include="data.txt" />
+    <Content Include="getallcheckers.aspx" />
     <Content Include="getcheckfile.aspx" />
     <Content Include="getcheckimages.aspx" />
     <Content Include="getcheckitem.aspx" />
     <Content Include="getcheckitemresult.aspx" />
     <Content Include="getchecklist.aspx" />
+    <Content Include="getcheckordercontracts.aspx" />
+    <Content Include="getcheckorders.aspx" />
+    <Content Include="getcontractinfo.aspx" />
     <Content Include="getnotchecklist.aspx" />
+    <Content Include="getproductinfo.aspx" />
     <Content Include="Global.asax" />
-    <Content Include="handleHttpsRegister.aspx" />
     <Content Include="index.html" />
     <Content Include="login.aspx" />
     <Content Include="test.aspx" />
@@ -88,6 +93,13 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="assignchecker.aspx.cs">
+      <DependentUpon>assignchecker.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="assignchecker.aspx.designer.cs">
+      <DependentUpon>assignchecker.aspx</DependentUpon>
+    </Compile>
     <Compile Include="BasePage.cs" />
     <Compile Include="checkproduct.aspx.cs">
       <DependentUpon>checkproduct.aspx</DependentUpon>
@@ -97,7 +109,16 @@
       <DependentUpon>checkproduct.aspx</DependentUpon>
     </Compile>
     <Compile Include="ConnectionFactory.cs" />
+    <Compile Include="DomainModel\CheckOrder.cs" />
+    <Compile Include="DomainModel\PageInfo.cs" />
     <Compile Include="DomainModel\User.cs" />
+    <Compile Include="getallcheckers.aspx.cs">
+      <DependentUpon>getallcheckers.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="getallcheckers.aspx.designer.cs">
+      <DependentUpon>getallcheckers.aspx</DependentUpon>
+    </Compile>
     <Compile Include="getcheckfile.aspx.cs">
       <DependentUpon>getcheckfile.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -127,6 +148,24 @@
     <Compile Include="getchecklist.aspx.cs">
       <DependentUpon>getchecklist.aspx</DependentUpon>
     </Compile>
+    <Compile Include="getcheckordercontracts.aspx.cs">
+      <DependentUpon>getcheckordercontracts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="getcheckordercontracts.aspx.designer.cs">
+      <DependentUpon>getcheckordercontracts.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="getcheckorders.aspx.cs">
+      <DependentUpon>getcheckorders.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="getcheckorders.aspx.designer.cs">
+      <DependentUpon>getcheckorders.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="getcontractinfo.aspx.cs">
+      <DependentUpon>getcontractinfo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="getnotchecklist.aspx.cs">
       <DependentUpon>getnotchecklist.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -134,15 +173,15 @@
     <Compile Include="getnotchecklist.aspx.designer.cs">
       <DependentUpon>getnotchecklist.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
-    <Compile Include="handleHttpsRegister.aspx.cs">
-      <DependentUpon>handleHttpsRegister.aspx</DependentUpon>
+    <Compile Include="getproductinfo.aspx.cs">
+      <DependentUpon>getproductinfo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="handleHttpsRegister.aspx.designer.cs">
-      <DependentUpon>handleHttpsRegister.aspx</DependentUpon>
+    <Compile Include="getproductinfo.aspx.designer.cs">
+      <DependentUpon>getproductinfo.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="login.aspx.cs">
       <DependentUpon>login.aspx</DependentUpon>
@@ -151,6 +190,7 @@
       <DependentUpon>login.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\CheckOrderService.cs" />
     <Compile Include="Service\UserService.cs" />
     <Compile Include="test.aspx.cs">
       <DependentUpon>test.aspx</DependentUpon>

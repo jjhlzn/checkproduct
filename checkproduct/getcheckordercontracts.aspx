@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="handleHttpsRegister.aspx.cs" Inherits="checkproduct.handleHttpsRegister" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="getcheckordercontracts.aspx.cs" Inherits="checkproduct.getcheckordercontracts" %>
 
 <!DOCTYPE html>
 

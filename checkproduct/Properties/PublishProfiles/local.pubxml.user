@@ -9,8 +9,11 @@
     <_PublishTargetUrl>C:\website</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
+    <File Include="assignchecker.aspx">
+      <publishTime>01/23/2018 21:35:25</publishTime>
+    </File>
     <File Include="bin/checkproduct.dll">
-      <publishTime>01/23/2018 13:22:04</publishTime>
+      <publishTime>01/25/2018 18:35:42</publishTime>
     </File>
     <File Include="bin/Dapper.dll">
       <publishTime>07/22/2016 14:52:40</publishTime>
@@ -27,6 +30,9 @@
     <File Include="data.txt">
       <publishTime>12/19/2017 14:28:57</publishTime>
     </File>
+    <File Include="getallcheckers.aspx">
+      <publishTime>01/23/2018 19:21:35</publishTime>
+    </File>
     <File Include="getcheckfile.aspx">
       <publishTime>12/19/2017 14:28:57</publishTime>
     </File>
@@ -42,8 +48,26 @@
     <File Include="getchecklist.aspx">
       <publishTime>12/19/2017 14:28:57</publishTime>
     </File>
+    <File Include="getcheckordercontracts.aspx">
+      <publishTime>01/24/2018 19:21:10</publishTime>
+    </File>
+    <File Include="getcheckorderlist.aspx">
+      <publishTime>01/23/2018 14:20:11</publishTime>
+    </File>
+    <File Include="getcheckorders.aspx">
+      <publishTime>01/23/2018 16:56:21</publishTime>
+    </File>
+    <File Include="getcontractinfo.aspx">
+      <publishTime>01/25/2018 10:57:34</publishTime>
+    </File>
+    <File Include="getcontractproducts.aspx">
+      <publishTime>01/24/2018 21:38:07</publishTime>
+    </File>
     <File Include="getnotchecklist.aspx">
       <publishTime>12/19/2017 14:28:57</publishTime>
+    </File>
+    <File Include="getproductinfo.aspx">
+      <publishTime>01/25/2018 14:51:19</publishTime>
     </File>
     <File Include="Global.asax">
       <publishTime>12/19/2017 14:28:57</publishTime>
