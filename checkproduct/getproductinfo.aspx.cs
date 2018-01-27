@@ -20,6 +20,13 @@ namespace checkproduct
             string productNo = Request.Params["productNo"];
             Product product = checkOrderService.GetProductInfo(contractNo, productNo);
 
+            /*
+            List<string> urls = new List<string>();
+            foreach(string url in product.pictureUrls)
+            {
+                string newUrl = string.Format("http://{0}:{1}/{2}", Request.)
+            }*/
+
             var resp = new
             {
                 status = product != null ? 0 : -1,

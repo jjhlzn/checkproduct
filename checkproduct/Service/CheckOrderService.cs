@@ -33,7 +33,9 @@ namespace checkproduct.Service
                 whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '')";
             }
 
-            string sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh, 
+            string sql = "";
+            
+            sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh, 
                             (select name from rs_employee where e_no = yw_mxd.zdr) as tracker, 
                             (select name from rs_employee where e_no = yw_mxd_yhsqd.yhy) as checker, 
                             yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate
@@ -138,7 +140,7 @@ namespace checkproduct.Service
 
         public Product GetProductInfo(string contractNo, string productNo)
         {
-            string sql = @"select bzjs_cy as pickCount, yhjg as checkResult, yw_mxd_cmd.djtjms as boxSize, 
+            string sql = @"select mxdbh as ticketNo, mxd_spid as spid, bzjs_cy as pickCount, yhjg as checkResult, yw_mxd_cmd.djtjms as boxSize, 
                             yw_mxd_cmd.mjmz as grossWeight, yw_mxd_cmd.mjjz as netWeight, yw_mxd_cmd.yhms as checkMemo 
                             from yw_mxd_cmd where sghth = '{0}' and spbm = '{1}'";
             sql = string.Format(sql, contractNo, productNo);
@@ -147,8 +149,76 @@ namespace checkproduct.Service
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
                 Product product = conn.QueryFirstOrDefault<Product>(sql);
+
+                if (product != null) {
+                    //获取验货的图片
+                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}' and mxd_spid = '{1}' order by sqrq ";
+                    sql = string.Format(sql, product.ticketNo, product.spid);
+
+                    var pictureUrls = conn.Query<string>(sql);
+                    product.pictureUrls = pictureUrls.AsList<string>();
+                }
                 return product;
             }
+        }
+
+        public bool CheckProduct(string ticketNo, string contractNo, string productNo, CheckProductResult checkResult)
+        {
+            logger.Debug("check product is called");
+            //设置值
+            string sql = @"update yw_mxd_cmd set bzjs_cy = '{0}', yhjg = '{1}', djtjms = '{2}', mjmz = '{3}', mjjz = '{4}', yhms = '{5}'
+                            where sghth = '{6}' and spbm = '{7}'";
+
+            sql = string.Format(sql, checkResult.pickCount, checkResult.checkResult, checkResult.boxSize, checkResult.grossWeight,
+                checkResult.netWeight, checkResult.checkMemo, contractNo, productNo);
+            logger.Debug("sql: " + sql);
+
+            string spid = "";
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                conn.Execute(sql);
+
+                //获取mxd_spid
+                sql = @"select mxd_spid from yw_mxd_cmd where sghth = '{0}' and spbm = '{1}'";
+                sql = string.Format(sql, contractNo, productNo);
+                logger.Debug("sql: " + sql);
+
+                var result = conn.Query<string>(sql);
+                if (result.Count<string>() == 0)
+                {
+                    return false;
+                }
+                spid = result.First<string>();
+
+                //设置图片
+                foreach (string url in checkResult.addImages)
+                {
+                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz)
+                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}')";
+                    sql = string.Format(sql, ticketNo, 1, spid, DateTime.Now, url, url, "辅图", 1);
+                    logger.Debug("sql: " + sql);
+
+                    conn.Execute(sql);
+                }
+
+                foreach (string url in checkResult.deleteImages)
+                {
+                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}'";
+                    int index = url.IndexOf("uploads/");
+                    string fileName = url;
+                    if (index != -1)
+                    {
+                        fileName = url.Substring(index + "uploads/".Length);
+                    }
+                    sql = string.Format(sql, fileName, ticketNo);
+                    logger.Debug("sql: " + sql);
+
+                    conn.Execute(sql);
+                }
+
+                return true;
+            }
+           
         }
     }
 }

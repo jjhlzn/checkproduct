@@ -18,10 +18,11 @@ namespace checkproduct
         protected void Page_Load(object sender, EventArgs e)
         {
             PageInfo pageInfo = new PageInfo();
-            pageInfo.pageNo = 0;
             string username = "";
 
             string status = Request.Params["status"];
+            string pageNo = Request.Params["pageNo"];
+            pageInfo.pageNo = int.Parse(pageNo);
 
             GetCheckOrdersResult checkOrdersResult = checkOrderService.GetCheckOrders(DateTime.Now, DateTime.Now, status, username, pageInfo);
 
