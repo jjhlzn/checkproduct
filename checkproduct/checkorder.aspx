@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="getnotchecklist.aspx.cs" Inherits="checkproduct.getnotchecklist" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="checkorder.aspx.cs" Inherits="checkproduct.checkorder" %>
 
 <!DOCTYPE html>
 

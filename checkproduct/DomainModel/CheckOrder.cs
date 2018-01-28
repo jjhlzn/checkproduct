@@ -21,6 +21,10 @@ namespace checkproduct.DomainModel
         public int notQualifiedCount;
         public int notCheckCount;
         public int tbdCount;
+
+        public string checkMemo; //验货备注
+        public string checkResult;
+        public List<string> pictureUrls = new List<string>(); //验货图片链接
     }
 
     public class CheckOrderContract
@@ -31,7 +35,7 @@ namespace checkproduct.DomainModel
         public string tracker;
         public string checker;
         public string deadlineDate;
-        public List<Product> products;
+        public List<Product> products = new List<Product>();
     }
 
     public class Product
@@ -47,7 +51,7 @@ namespace checkproduct.DomainModel
         public string netWeight; //单件净重
         public string checkMemo; //验货备注
         public string checkResult;
-        public List<string> pictureUrls; //验货图片链接
+        public List<string> pictureUrls = new List<string>(); //验货图片链接
 
         public string tracker;
         public string checker;

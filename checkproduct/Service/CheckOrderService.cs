@@ -38,7 +38,8 @@ namespace checkproduct.Service
             sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh, 
                             (select name from rs_employee where e_no = yw_mxd.zdr) as tracker, 
                             (select name from rs_employee where e_no = yw_mxd_yhsqd.yhy) as checker, 
-                            yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate
+                            yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate,
+                            yw_mxd.yhjg as checkResult, yw_mxd.yhms as checkMemo
                                 FROM yw_mxd with (nolock) ,yw_mxd_yhsqd      
                                 WHERE " + whereClause + @" and yw_mxd.mxdbh not in (select top "+ skipCount + @" yw_mxd.mxdbh from yw_mxd with (nolock), yw_mxd_yhsqd
 
@@ -193,6 +194,25 @@ namespace checkproduct.Service
         }
 
 
+        public CheckOrder GetCheckOrderInfo(string ticketNo)
+        {
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                string sql = @"select Top 1 yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh, 
+                                        (select name from rs_employee where e_no = yw_mxd.zdr) as tracker, 
+                                        (select name from rs_employee where e_no = yw_mxd_yhsqd.yhy) as checker, 
+                                        yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate,
+                                        yw_mxd.yhjg as checkResult, yw_mxd.yhms as checkMemo
+                                FROM yw_mxd with (nolock) ,yw_mxd_yhsqd 
+                                where yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh and yw_mxd.mxdbh = '{0}' ";
+                sql = string.Format(sql, ticketNo);
+                logger.Debug("sql: " + sql);
+         
+                CheckOrder checkOrder = conn.QueryFirstOrDefault<CheckOrder>(sql);
+                return checkOrder;
+            }
+        }
+
         public CheckOrderContract GetContractInfo(string ticketNo, string contractNo)
         {
             CheckOrderContract contract = new CheckOrderContract();
@@ -304,6 +324,21 @@ namespace checkproduct.Service
                 return true;
             }
            
+        }
+
+        public bool Check(string ticketNo, CheckProductResult checkResult)
+        {
+            string sql = @"update yw_mxd set yhjg = '{0}', yhms = '{1}' where mxdbh = '{2}'";
+            sql = string.Format(sql, checkResult.checkResult, checkResult.checkMemo, ticketNo);
+
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                conn.Execute(sql);
+
+                //TODO 设置图片
+
+                return true;
+            }
         }
     }
 }

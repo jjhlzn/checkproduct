@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="getchecklist.aspx.cs" Inherits="checkproduct.getchecklist" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="getcheckorderinfo.aspx.cs" Inherits="checkproduct.getcheckorderinfo" %>
 
 <!DOCTYPE html>
 
@@ -8,7 +8,7 @@
     <title></title>
 </head>
 <body>
-    <form id="form2" runat="server">
+    <form id="form1" runat="server">
     <div>
     
     </div>

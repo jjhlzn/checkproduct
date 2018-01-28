@@ -13,7 +13,7 @@
       <publishTime>01/23/2018 21:35:25</publishTime>
     </File>
     <File Include="bin/checkproduct.dll">
-      <publishTime>01/28/2018 10:04:15</publishTime>
+      <publishTime>01/28/2018 14:56:27</publishTime>
     </File>
     <File Include="bin/Dapper.dll">
       <publishTime>07/22/2016 14:52:40</publishTime>
@@ -23,6 +23,9 @@
     </File>
     <File Include="bin/Newtonsoft.Json.dll">
       <publishTime>08/16/2017 16:44:01</publishTime>
+    </File>
+    <File Include="checkorder.aspx">
+      <publishTime>01/28/2018 14:24:38</publishTime>
     </File>
     <File Include="checkproduct.aspx">
       <publishTime>12/19/2017 14:28:57</publishTime>
@@ -50,6 +53,9 @@
     </File>
     <File Include="getcheckordercontracts.aspx">
       <publishTime>01/24/2018 19:21:10</publishTime>
+    </File>
+    <File Include="getcheckorderinfo.aspx">
+      <publishTime>01/28/2018 13:39:13</publishTime>
     </File>
     <File Include="getcheckorderlist.aspx">
       <publishTime>01/23/2018 14:20:11</publishTime>

@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assignchecker.aspx" />
+    <Content Include="checkorder.aspx" />
     <Content Include="checkproduct.aspx" />
     <Content Include="data.txt" />
     <Content Include="getallcheckers.aspx" />
@@ -78,11 +79,10 @@
     <Content Include="getcheckimages.aspx" />
     <Content Include="getcheckitem.aspx" />
     <Content Include="getcheckitemresult.aspx" />
-    <Content Include="getchecklist.aspx" />
     <Content Include="getcheckordercontracts.aspx" />
+    <Content Include="getcheckorderinfo.aspx" />
     <Content Include="getcheckorders.aspx" />
     <Content Include="getcontractinfo.aspx" />
-    <Content Include="getnotchecklist.aspx" />
     <Content Include="getproductinfo.aspx" />
     <Content Include="getproducts.aspx" />
     <Content Include="Global.asax" />
@@ -90,7 +90,6 @@
     <Content Include="login.aspx" />
     <Content Include="test.aspx" />
     <Content Include="upload.aspx" />
-    <Content Include="upload1.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +101,13 @@
       <DependentUpon>assignchecker.aspx</DependentUpon>
     </Compile>
     <Compile Include="BasePage.cs" />
+    <Compile Include="checkorder.aspx.cs">
+      <DependentUpon>checkorder.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="checkorder.aspx.designer.cs">
+      <DependentUpon>checkorder.aspx</DependentUpon>
+    </Compile>
     <Compile Include="checkproduct.aspx.cs">
       <DependentUpon>checkproduct.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -146,15 +152,19 @@
     <Compile Include="getcheckitemresult.aspx.designer.cs">
       <DependentUpon>getcheckitemresult.aspx</DependentUpon>
     </Compile>
-    <Compile Include="getchecklist.aspx.cs">
-      <DependentUpon>getchecklist.aspx</DependentUpon>
-    </Compile>
     <Compile Include="getcheckordercontracts.aspx.cs">
       <DependentUpon>getcheckordercontracts.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="getcheckordercontracts.aspx.designer.cs">
       <DependentUpon>getcheckordercontracts.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="getcheckorderinfo.aspx.cs">
+      <DependentUpon>getcheckorderinfo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="getcheckorderinfo.aspx.designer.cs">
+      <DependentUpon>getcheckorderinfo.aspx</DependentUpon>
     </Compile>
     <Compile Include="getcheckorders.aspx.cs">
       <DependentUpon>getcheckorders.aspx</DependentUpon>
@@ -166,13 +176,6 @@
     <Compile Include="getcontractinfo.aspx.cs">
       <DependentUpon>getcontractinfo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="getnotchecklist.aspx.cs">
-      <DependentUpon>getnotchecklist.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="getnotchecklist.aspx.designer.cs">
-      <DependentUpon>getnotchecklist.aspx</DependentUpon>
     </Compile>
     <Compile Include="getproductinfo.aspx.cs">
       <DependentUpon>getproductinfo.aspx</DependentUpon>
@@ -213,13 +216,6 @@
     </Compile>
     <Compile Include="upload.aspx.designer.cs">
       <DependentUpon>upload.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="upload1.aspx.cs">
-      <DependentUpon>upload1.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="upload1.aspx.designer.cs">
-      <DependentUpon>upload1.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
