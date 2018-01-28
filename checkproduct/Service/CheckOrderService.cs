@@ -57,11 +57,74 @@ namespace checkproduct.Service
                 GetCheckOrdersResult result = new GetCheckOrdersResult();
                 result.checkOrders = orders.AsList<CheckOrder>();
 
+                if (status == CheckOrder.Status_Has_Checked)
+                {
+                    SetCheckResultStatus(result.checkOrders);
+                }
+
                 sql = "select count(*) from  yw_mxd with (nolock) ,yw_mxd_yhsqd where " + whereClause;
                 result.totalCount = conn.QuerySingleOrDefault<int>(sql);
                 return result;
             }
-            
+        }
+
+
+        private class C
+        {
+            public string ticketNo;
+            public string checkResult;
+            public int checkCount = 0;
+        }
+        private void SetCheckResultStatus(List<CheckOrder> orders)
+        {
+            if (orders.Count == 0)
+                return;
+
+            string ordersStr = "(";
+            foreach(CheckOrder order in orders)
+            {
+                ordersStr += string.Format("'{0}',", order.ticketNo);
+            }
+            ordersStr = ordersStr.Substring(0, ordersStr.Length - 1);
+            ordersStr += ")";
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                string sql = @"select mxdbh as ticketNo, yhjg as checkResult, COUNT(*) as checkCount from (select distinct mxdbh, spbm, yhjg from yw_mxd_cmd 
+                               where mxdbh in " + ordersStr + " ) as a group by yhjg, mxdbh";
+
+                var resultSet = conn.Query<C>(sql);
+                foreach(C result in resultSet)
+                {
+                    foreach(CheckOrder order in orders)
+                    {
+                        if (order.ticketNo == result.ticketNo)
+                        {
+                            if (string.IsNullOrEmpty(result.checkResult)) {
+                                order.notCheckCount += result.checkCount;
+                            } else
+                            {
+                                switch(result.checkResult)
+                                {
+                                    case "合格":
+                                        order.qualifiedCount = result.checkCount;
+                                        break;
+                                    case "不合格":
+                                        order.notQualifiedCount = result.checkCount;
+                                        break;
+                                    case "未验":
+                                        order.notCheckCount += result.checkCount;
+                                        break;
+                                    case "待定":
+                                        order.tbdCount += result.checkCount;
+                                        break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+
+            }
         }
 
         public bool AssignChecker(string ticketNo, string checker)
@@ -72,7 +135,7 @@ namespace checkproduct.Service
 
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
-                //conn.Execute(sql);
+                conn.Execute(sql);
                 return true;
             }
         }  
@@ -95,7 +158,7 @@ namespace checkproduct.Service
 
         public List<Product> GetContractProducts(string ticketNo, string contractNo)
         {
-            string sql = @"select distinct spzwmc as name, spbm as productNo, '待验货' as checkResult from yw_mxd_cmd where sghth = '{0}'";
+            string sql = @"select distinct spzwmc as name, spbm as productNo, yhjg as checkResult from yw_mxd_cmd where sghth = '{0}'";
             sql = string.Format(sql, contractNo);
             logger.Debug("sql: " + sql);
 
@@ -107,7 +170,29 @@ namespace checkproduct.Service
             
         }
 
-       
+        public List<Product> GetProducts(string ticketNo, string type)
+        {
+            
+            string sql = @"select distinct mxdbh as ticketNo, spzwmc as name, spbm as productNo, yhjg as checkResult, sghth as contractNo,
+                           (select name from rs_employee where e_no = (select top 1 zdr from yw_mxd where mxdbh = '" + ticketNo + @"')) as tracker, 
+                           (select name from rs_employee where e_no = (select top 1 yhy from yw_mxd_yhsqd where mxdbh = '" + ticketNo + @"')) as checker
+                           from yw_mxd_cmd where mxdbh = '{0}' ";
+            if (type != "全部")
+            {
+                sql += " and yhjg = '" + type + "' ";
+            }
+            sql = string.Format(sql, ticketNo);
+            logger.Debug("sql: " + sql);
+
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                var products = conn.Query<Product>(sql);
+                return products.AsList<Product>();
+            }
+
+        }
+
+
         public CheckOrderContract GetContractInfo(string ticketNo, string contractNo)
         {
             CheckOrderContract contract = new CheckOrderContract();

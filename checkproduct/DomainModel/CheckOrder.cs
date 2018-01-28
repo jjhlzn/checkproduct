@@ -37,6 +37,7 @@ namespace checkproduct.DomainModel
     public class Product
     {
         public string ticketNo;
+        public string contractNo;
         public string spid;
         public string productNo;
         public string name;
@@ -47,6 +48,9 @@ namespace checkproduct.DomainModel
         public string checkMemo; //验货备注
         public string checkResult;
         public List<string> pictureUrls; //验货图片链接
+
+        public string tracker;
+        public string checker;
     }
 
     public class CheckProductResult

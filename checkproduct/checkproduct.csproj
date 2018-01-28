@@ -84,6 +84,7 @@
     <Content Include="getcontractinfo.aspx" />
     <Content Include="getnotchecklist.aspx" />
     <Content Include="getproductinfo.aspx" />
+    <Content Include="getproducts.aspx" />
     <Content Include="Global.asax" />
     <Content Include="index.html" />
     <Content Include="login.aspx" />
@@ -179,6 +180,13 @@
     </Compile>
     <Compile Include="getproductinfo.aspx.designer.cs">
       <DependentUpon>getproductinfo.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="getproducts.aspx.cs">
+      <DependentUpon>getproducts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="getproducts.aspx.designer.cs">
+      <DependentUpon>getproducts.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

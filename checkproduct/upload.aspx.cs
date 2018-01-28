@@ -18,14 +18,15 @@ namespace checkproduct
 
         protected void Page_Load(object sender, EventArgs e)
         {
+
                 Thread.Sleep(500);
-              
+
                 String[] paths = new String[Request.Files.Count];
 
                 logger.Debug(Request.Files);
 
                 int i = 0;
-                foreach(String fileName in Request.Files )
+                foreach (String fileName in Request.Files)
                 {
                     paths[i++] = uploadImage(Request.Files[fileName]);
                 }
@@ -38,6 +39,7 @@ namespace checkproduct
                 };
                 Response.Write(JsonConvert.SerializeObject(resp));
                 Response.End();
+            
             
         }
 
