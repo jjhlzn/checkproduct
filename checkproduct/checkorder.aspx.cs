@@ -22,6 +22,10 @@ namespace checkproduct
 
             CheckProductResult checkResult = new CheckProductResult();
             checkResult.checkResult = Request.Params["checkResult"];
+            if (string.IsNullOrEmpty(checkResult.checkResult) || checkResult.checkResult == "null")
+            {
+                checkResult.checkResult = "未完成";
+            }
             checkResult.checkMemo = Request.Params["checkMemo"];
 
             logger.Debug("checkResult: " + checkResult.ToString());

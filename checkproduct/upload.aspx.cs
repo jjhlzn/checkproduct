@@ -19,22 +19,27 @@ namespace checkproduct
         protected void Page_Load(object sender, EventArgs e)
         {
 
-                Thread.Sleep(500);
+                //Thread.Sleep(500);
 
                 String[] paths = new String[Request.Files.Count];
+                string[] originNames = new String[Request.Files.Count];
 
                 logger.Debug(Request.Files);
 
                 int i = 0;
                 foreach (String fileName in Request.Files)
                 {
-                    paths[i++] = uploadImage(Request.Files[fileName]);
+                    paths[i] = uploadImage(Request.Files[fileName]);
+                    originNames[i] = fileName;
+                    i++;
+                
                 }
 
                 var resp = new
                 {
                     status = 0,
                     errorMessage = "",
+                    orginNames = originNames,
                     fileNames = paths
                 };
                 Response.Write(JsonConvert.SerializeObject(resp));

@@ -25,12 +25,18 @@ namespace checkproduct.Service
                                      ( yw_mxd.bbh = yw_mxd_yhsqd.bbh ) and
                                      ( yw_mxd.bb_flag = 'Y' ) ";
 
-            if (status == CheckOrder.Status_Not_Assign)
-            {
+
+            if (status == CheckOrder.Status_Not_Assign) {
                 whereClause += " and (yw_mxd_yhsqd.yhy is null or yw_mxd_yhsqd.yhy = '')";
-            } else
-            {
-                whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '')";
+            } else if (status == CheckOrder.Status_Has_Checked) {
+                whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '') and yw_mxd.yhjg = '完成'";
+            } else if (status == CheckOrder.Status_Not_Complete) {
+                whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '') and yw_mxd.yhjg = '未完成'";
+            } else if (status == CheckOrder.Status_Not_Check) {
+                whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '') and yw_mxd.yhjg is null";
+            } else {
+                logger.Fatal("not known status: " + status);
+                return null;
             }
 
             string sql = "";

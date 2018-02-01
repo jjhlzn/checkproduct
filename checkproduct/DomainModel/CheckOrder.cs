@@ -9,6 +9,7 @@ namespace checkproduct.DomainModel
     {
         public static string Status_Not_Assign = "未分配";
         public static string Status_Not_Check = "未验货";
+        public static string Status_Not_Complete = "未完成";
         public static string Status_Has_Checked = "已验货";
 
         public string ticketNo;

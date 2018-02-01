@@ -24,6 +24,10 @@ namespace checkproduct
 
             CheckProductResult checkResult = new CheckProductResult();
             checkResult.checkResult = Request.Params["checkResult"];
+            if (string.IsNullOrEmpty(checkResult.checkResult) || checkResult.checkResult == "null")
+            {
+                checkResult.checkResult = "未完成";
+            }
             checkResult.pickCount = Request.Params["pickCount"];
             checkResult.boxSize = Request.Params["boxSize"];
             checkResult.grossWeight = Request.Params["grossWeight"];
