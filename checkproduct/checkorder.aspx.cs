@@ -18,6 +18,7 @@ namespace checkproduct
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            string username = Request.Params["username"];
             string ticketNo = Request.Params["ticketNo"];
 
             CheckProductResult checkResult = new CheckProductResult();
@@ -28,6 +29,7 @@ namespace checkproduct
             }
             checkResult.checkMemo = Request.Params["checkMemo"];
 
+            logger.Debug("checker username: " + username);
             logger.Debug("checkResult: " + checkResult.ToString());
 
             logger.Debug("addImages:");
@@ -55,7 +57,7 @@ namespace checkproduct
                 }
             }
 
-            bool isSuccess = service.Check(ticketNo, checkResult);
+            bool isSuccess = service.Check(ticketNo, username, checkResult);
 
             var resp = new
             {

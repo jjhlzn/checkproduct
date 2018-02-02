@@ -17,9 +17,19 @@ namespace checkproduct.Service
     public class CheckOrderService
     {
         private static ILog logger = LogManager.GetLogger(typeof(CheckOrderService));
+        private UserService userService = new UserService();
 
         public GetCheckOrdersResult GetCheckOrders(DateTime startDate, DateTime endDate, string status, string username, PageInfo pageInfo, string keyword = "")
         {
+            GetCheckOrdersResult result = new GetCheckOrdersResult();
+
+            string role = userService.GetRole(username);
+            if (string.IsNullOrEmpty(role))
+            {
+                logger.Warn("找不到username = " + username + "的角色");
+                return result;
+            }
+
             int skipCount = pageInfo.pageSize * pageInfo.pageNo;
             string whereClause = @"  ( yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh ) and  
                                      ( yw_mxd.bbh = yw_mxd_yhsqd.bbh ) and
@@ -37,6 +47,24 @@ namespace checkproduct.Service
             } else {
                 logger.Fatal("not known status: " + status);
                 return null;
+            }
+
+
+            if (username == "9900")
+            {
+                                                    
+            }
+            else if (role == User.Role_Checker_Manager)
+            {
+
+            } else {
+                whereClause += " and yhy = '" +username + "' ";
+            }
+
+
+            if ( !string.IsNullOrEmpty(keyword))
+            {
+                whereClause += " and yw_mxd.mxdbh like '%" + keyword + "%' ";
             }
 
             string sql = "";
@@ -61,7 +89,7 @@ namespace checkproduct.Service
                 {
                     order.status = status;
                 }
-                GetCheckOrdersResult result = new GetCheckOrdersResult();
+               
                 result.checkOrders = orders.AsList<CheckOrder>();
 
                 if (status == CheckOrder.Status_Has_Checked)
@@ -273,9 +301,14 @@ namespace checkproduct.Service
             }
         }
 
-        public bool CheckProduct(string ticketNo, string contractNo, string productNo, CheckProductResult checkResult)
+        public bool CheckProduct(string ticketNo, string contractNo, string productNo, string username, CheckProductResult checkResult)
         {
             logger.Debug("check product is called");
+            if (!userService.CheckIfHasCheckPermission(username, ticketNo))
+            {
+                return false;
+            }
+
             //设置值
             string sql = @"update yw_mxd_cmd set bzjs_cy = '{0}', yhjg = '{1}', djtjms = '{2}', mjmz = '{3}', mjjz = '{4}', yhms = '{5}'
                             where sghth = '{6}' and spbm = '{7}'";
@@ -332,8 +365,13 @@ namespace checkproduct.Service
            
         }
 
-        public bool Check(string ticketNo, CheckProductResult checkResult)
+        public bool Check(string ticketNo, string username, CheckProductResult checkResult)
         {
+            if (!userService.CheckIfHasCheckPermission(username, ticketNo))
+            {
+                return false;
+            }
+            
             string sql = @"update yw_mxd set yhjg = '{0}', yhms = '{1}' where mxdbh = '{2}'";
             sql = string.Format(sql, checkResult.checkResult, checkResult.checkMemo, ticketNo);
 

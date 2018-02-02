@@ -12,6 +12,7 @@ namespace checkproduct.DomainModel
 
         public string username;
         public string name;
+        public string password;
         public string department;
         public string role;
     }

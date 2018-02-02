@@ -18,6 +18,9 @@ namespace checkproduct
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            string username = Request.Params["username"];
+
+
             string ticketNo = Request.Params["ticketNo"];
             string contractNo = Request.Params["contractNo"];
             string productNo = Request.Params["productNo"];
@@ -34,6 +37,7 @@ namespace checkproduct
             checkResult.netWeight = Request.Params["netWeight"];
             checkResult.checkMemo = Request.Params["checkMemo"];
 
+            logger.Debug("checker username: " + username);
             logger.Debug("checkResult: " + checkResult.ToString());
 
             logger.Debug("addImages:");
@@ -61,7 +65,7 @@ namespace checkproduct
                 }
             }
 
-            bool isSuccess = service.CheckProduct(ticketNo, contractNo, productNo, checkResult);
+            bool isSuccess = service.CheckProduct(ticketNo, contractNo, productNo, username, checkResult);
 
             var resp = new
             {
