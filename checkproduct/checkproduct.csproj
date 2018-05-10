@@ -75,9 +75,6 @@
     <Content Include="checkproduct.aspx" />
     <Content Include="getallcheckers.aspx" />
     <Content Include="getcheckfile.aspx" />
-    <Content Include="getcheckimages.aspx" />
-    <Content Include="getcheckitem.aspx" />
-    <Content Include="getcheckitemresult.aspx" />
     <Content Include="getcheckordercontracts.aspx" />
     <Content Include="getcheckorderinfo.aspx" />
     <Content Include="getcheckorders.aspx" />
@@ -131,25 +128,6 @@
     </Compile>
     <Compile Include="getcheckfile.aspx.designer.cs">
       <DependentUpon>getcheckfile.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="getcheckimages.aspx.cs">
-      <DependentUpon>getcheckimages.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="getcheckimages.aspx.designer.cs">
-      <DependentUpon>getcheckimages.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="getcheckitem.aspx.cs">
-      <DependentUpon>getcheckitem.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="getcheckitem.aspx.designer.cs">
-      <DependentUpon>getcheckitem.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="getcheckitemresult.aspx.cs">
-      <DependentUpon>getcheckitemresult.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="getcheckitemresult.aspx.designer.cs">
-      <DependentUpon>getcheckitemresult.aspx</DependentUpon>
     </Compile>
     <Compile Include="getcheckordercontracts.aspx.cs">
       <DependentUpon>getcheckordercontracts.aspx</DependentUpon>

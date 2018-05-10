@@ -19,7 +19,8 @@ namespace checkproduct.Service
         private static ILog logger = LogManager.GetLogger(typeof(CheckOrderService));
         private UserService userService = new UserService();
 
-        public GetCheckOrdersResult GetCheckOrders(DateTime startDate, DateTime endDate, string status, string username, PageInfo pageInfo, string keyword = "")
+        public GetCheckOrdersResult GetCheckOrders(DateTime startDate, DateTime endDate, string status, string username, string checker,
+            PageInfo pageInfo, string keyword = "")
         {
             GetCheckOrdersResult result = new GetCheckOrdersResult();
 
@@ -53,14 +54,16 @@ namespace checkproduct.Service
             if (username == "9900")
             {
                                                     
-            }
-            else if (role == User.Role_Checker_Manager)
-            {
+            } else if (role == User.Role_Checker_Manager) {
 
             } else {
                 whereClause += " and yhy = '" +username + "' ";
             }
 
+            if (checker != null && !string.IsNullOrEmpty(checker) && !"-1".Equals(checker) )
+            {
+                whereClause += " and yhy = '" + checker + "' ";
+            }
 
             if ( !string.IsNullOrEmpty(keyword))
             {
@@ -70,8 +73,12 @@ namespace checkproduct.Service
             string sql = "";
             
             sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh, 
-                            (select name from rs_employee where e_no = yw_mxd.zdr) as tracker, 
-                            (select name from rs_employee where e_no = yw_mxd_yhsqd.yhy) as checker, 
+                            (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
+                            (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker,
+                            (   select COUNT(*) from (
+                                select distinct sghth, mxd_spid  from yw_mxd_cmd aa where sghth in (
+                            select distinct sghth as contractNo 
+                              from yw_mxd_cmd where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh) as a) as productCount,
                             yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate,
                             yw_mxd.yhjg as checkResult, yw_mxd.yhms as checkMemo
                                 FROM yw_mxd with (nolock) ,yw_mxd_yhsqd      
@@ -124,9 +131,24 @@ namespace checkproduct.Service
             ordersStr += ")";
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
-                string sql = @"select mxdbh as ticketNo, yhjg as checkResult, COUNT(*) as checkCount from (select distinct mxdbh, spbm, yhjg from yw_mxd_cmd 
-                               where mxdbh in " + ordersStr + " ) as a group by yhjg, mxdbh";
-
+                string sql = @" select ticketNo, checkResult, SUM(checkCount) as checkCount from (                        
+  select 
+                                    mxdbh as ticketNo, 
+                                    sghth,
+                                    yhjg as checkResult, 
+                                    COUNT(*) as checkCount 
+                               from (select distinct yw_mxd_cmd.mxdbh, yw_mxd_cmd.sghth, mxd_spid, yw_mxd_cmd.yhjg from yw_mxd_cmd, yw_mxd
+                                      where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh 
+											and yw_mxd.mxdbh in " + ordersStr  + @"
+											and  bb_flag = 'Y') as a group by yhjg, mxdbh, sghth) as b group by ticketNo, checkResult";
+                /*
+                string sql = @"select 
+                                    mxdbh as ticketNo, 
+                                    yhjg as checkResult, 
+                                    COUNT(*) as checkCount 
+                               from (select distinct mxdbh, spbm, yhjg from yw_mxd_cmd 
+                                      where mxdbh in " + ordersStr + " ) as a group by yhjg, mxdbh"; */
+                logger.Debug("sql: " + sql);
                 var resultSet = conn.Query<C>(sql);
                 foreach(C result in resultSet)
                 {
@@ -138,6 +160,7 @@ namespace checkproduct.Service
                                 order.notCheckCount += result.checkCount;
                             } else
                             {
+                                //未验货 = 未完成 + 未验货
                                 switch(result.checkResult)
                                 {
                                     case "合格":
@@ -151,6 +174,9 @@ namespace checkproduct.Service
                                         break;
                                     case "待定":
                                         order.tbdCount += result.checkCount;
+                                        break;
+                                    case "未完成":
+                                        order.notCheckCount += result.checkCount;
                                         break;
                                 }
                             }
@@ -178,9 +204,9 @@ namespace checkproduct.Service
         public List<CheckOrderContract> GetCheckOrderContracts(string ticketNo)
         {
             string sql = @"select distinct sghth as contractNo, 
-                        (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd where mxdbh = '{0}')) as checker,
-                        (select name from rs_employee where e_no in (select top 1 zdr from yw_mxd where mxdbh = '{0}')) as tracker
-                          from yw_mxd_cmd where mxdbh = '{0}'";
+(select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
+                            (select name from rs_employee where e_no in (select top 1 zdr from yw_mxd where mxdbh = '{0}' order by yw_mxd.bbh desc)) as tracker
+                          from yw_mxd_cmd, yw_mxd where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh and yw_mxd_cmd.bbh = yw_mxd.bbh and yw_mxd.bb_flag = 'Y' and yw_mxd.mxdbh = '{0}'";
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
 
@@ -193,8 +219,14 @@ namespace checkproduct.Service
 
         public List<Product> GetContractProducts(string ticketNo, string contractNo)
         {
-            string sql = @"select distinct spzwmc as name, spbm as productNo, yhjg as checkResult from yw_mxd_cmd where sghth = '{0}'";
-            sql = string.Format(sql, contractNo);
+            string sql = @"select spid, 
+                           (select top 1 spzwmc from yw_mxd_cmd where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as name,
+                           (select top 1 spbm from yw_mxd_cmd where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as productNo,
+                            (select top 1 yhjg from yw_mxd_cmd where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as checkResult
+                           from (                         
+                          select distinct mxd_spid as spid 
+                                                    from yw_mxd_cmd where sghth = '{0}' and mxdbh = '{1}') as a";
+            sql = string.Format(sql, contractNo, ticketNo);
             logger.Debug("sql: " + sql);
 
             using (IDbConnection conn = ConnectionFactory.GetInstance())
@@ -207,14 +239,24 @@ namespace checkproduct.Service
 
         public List<Product> GetProducts(string ticketNo, string type)
         {
-            
-            string sql = @"select distinct mxdbh as ticketNo, spzwmc as name, spbm as productNo, yhjg as checkResult, sghth as contractNo,
-                           (select name from rs_employee where e_no = (select top 1 zdr from yw_mxd where mxdbh = '" + ticketNo + @"')) as tracker, 
-                           (select name from rs_employee where e_no = (select top 1 yhy from yw_mxd_yhsqd where mxdbh = '" + ticketNo + @"')) as checker
-                           from yw_mxd_cmd where mxdbh = '{0}' ";
+            string sql = @"  select  distinct
+            yw_mxd_cmd.mxdbh as ticketNo, 
+            (select top 1 a.spzwmc from yw_mxd_cmd as a where a.mxd_spid = yw_mxd_cmd.mxd_spid and a.sghth = yw_mxd_cmd.sghth and a.mxdbh = yw_mxd_cmd.mxdbh order by a.bbh desc) as name,
+            (select top 1 a.spbm from yw_mxd_cmd as a where a.mxd_spid = yw_mxd_cmd.mxd_spid and a.sghth = yw_mxd_cmd.sghth and a.mxdbh = yw_mxd_cmd.mxdbh order by a.bbh desc) as productNo,
+            (select top 1 a.yhjg from yw_mxd_cmd as a where a.mxd_spid = yw_mxd_cmd.mxd_spid and a.sghth = yw_mxd_cmd.sghth and a.mxdbh = yw_mxd_cmd.mxdbh order by a.bbh desc) as checkResult,
+            yw_mxd_cmd.sghth as contractNo,
+            mxd_spid as spid,
+            (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
+            (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker
+           from yw_mxd_cmd, yw_mxd
+           where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd_cmd.bbh = yw_mxd.bbh and  yw_mxd.bb_flag = 'Y' 
+            and mxd_spid in (                         
+  select distinct mxd_spid as spid 
+                            from yw_mxd_cmd where yw_mxd.bb_flag = 'Y'  and mxdbh = '{0}') ";
+
             if (type != "全部")
             {
-                sql += " and yhjg = '" + type + "' ";
+                sql += " and yw_mxd_cmd.yhjg = '" + type + "' ";
             }
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
@@ -233,18 +275,31 @@ namespace checkproduct.Service
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
                 string sql = @"select Top 1 yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh, 
-                                        (select name from rs_employee where e_no = yw_mxd.zdr) as tracker, 
-                                        (select name from rs_employee where e_no = yw_mxd_yhsqd.yhy) as checker, 
+                                       (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
+                                       (select name from rs_employee where e_no in (select top 1 zdr from yw_mxd where mxdbh = '{0}' order by yw_mxd.bbh desc)) as tracker,
                                         yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate,
                                         yw_mxd.yhjg as checkResult, yw_mxd.yhms as checkMemo
                                 FROM yw_mxd with (nolock) ,yw_mxd_yhsqd 
-                                where yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh and yw_mxd.mxdbh = '{0}' ";
+                                where yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd.bb_flag = 'Y'
+                                order by yw_mxd_yhsqd.bbh desc";
                 sql = string.Format(sql, ticketNo);
                 logger.Debug("sql: " + sql);
          
                 CheckOrder checkOrder = conn.QueryFirstOrDefault<CheckOrder>(sql);
+
+                if (checkOrder != null)
+                {
+                    //获取验货的图片
+                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'   order by sqrq, picture_xz";
+                    sql = string.Format(sql,  ticketNo, Special_SPID);
+                    logger.Debug("sql: " + sql);
+                    var pictureUrls = conn.Query<string>(sql);
+                    checkOrder.pictureUrls = pictureUrls.AsList<string>();
+                }
                 return checkOrder;
             }
+
+           
         }
 
         public CheckOrderContract GetContractInfo(string ticketNo, string contractNo)
@@ -252,10 +307,13 @@ namespace checkproduct.Service
             CheckOrderContract contract = new CheckOrderContract();
 
             string sql = @"select yw_mxd.mxdbh as ticketNo, 
-                           (select name from rs_employee where e_no = yw_mxd.zdr) as tracker, 
-                           (select name from rs_employee where e_no = yw_mxd_yhsqd.yhy) as checker, 
-                            yw_mxd_yhsqd.jcbh as jinCangNo, yjckrq as deadlineDate from yw_mxd, yw_mxd_yhsqd 
-                            where yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh and yw_mxd.mxdbh = '{0}'";
+                                 (select name from rs_employee where e_no = yw_mxd.zdr) as tracker, 
+                                 (select name from rs_employee where e_no = yw_mxd_yhsqd.yhy) as checker, 
+                                  yw_mxd_yhsqd.jcbh as jinCangNo, 
+                                  yjckrq as deadlineDate 
+                           from yw_mxd, yw_mxd_yhsqd 
+                           where yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh and  yw_mxd.bb_flag = 'Y'  and yw_mxd.mxdbh = '{0}' 
+                         order by yw_mxd_yhsqd.bbh desc";
 
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
@@ -277,12 +335,20 @@ namespace checkproduct.Service
             return contract;
         }
 
-        public Product GetProductInfo(string contractNo, string productNo)
+        public Product GetProductInfo(string ticketNo, string contractNo, string productNo, string spid)
         {
-            string sql = @"select mxdbh as ticketNo, mxd_spid as spid, bzjs_cy as pickCount, yhjg as checkResult, yw_mxd_cmd.djtjms as boxSize, 
-                            yw_mxd_cmd.mjmz as grossWeight, yw_mxd_cmd.mjjz as netWeight, yw_mxd_cmd.yhms as checkMemo 
-                            from yw_mxd_cmd where sghth = '{0}' and spbm = '{1}'";
-            sql = string.Format(sql, contractNo, productNo);
+            string sql = @"select mxdbh as ticketNo, 
+                                  bzjs as totalCount, 
+                                  mxd_spid as spid, 
+                                  bzjs_cy as pickCount, 
+                                  yhjg as checkResult, 
+                                  yw_mxd_cmd.djtjms as boxSize, 
+                                  yw_mxd_cmd.mjmz as grossWeight, 
+                                  yw_mxd_cmd.mjjz as netWeight, 
+                                  yw_mxd_cmd.yhms as checkMemo 
+                            from yw_mxd_cmd 
+                                  where  sghth = '{0}' and spbm = '{1}' and mxd_spid = '{2}' and mxdbh = '{3}' ";
+            sql = string.Format(sql, contractNo, productNo, spid, ticketNo);
             logger.Debug("sql: " + sql);
 
             using (IDbConnection conn = ConnectionFactory.GetInstance())
@@ -291,9 +357,9 @@ namespace checkproduct.Service
 
                 if (product != null) {
                     //获取验货的图片
-                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}' and mxd_spid = '{1}' order by sqrq ";
-                    sql = string.Format(sql, product.ticketNo, product.spid);
-
+                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}' and picture_describe = '{2}'  order by sqrq, picture_xz";
+                    sql = string.Format(sql, ticketNo, spid, contractNo);
+                    logger.Debug("sql: " + sql);
                     var pictureUrls = conn.Query<string>(sql);
                     product.pictureUrls = pictureUrls.AsList<string>();
                 }
@@ -301,7 +367,7 @@ namespace checkproduct.Service
             }
         }
 
-        public bool CheckProduct(string ticketNo, string contractNo, string productNo, string username, CheckProductResult checkResult)
+        public bool CheckProduct(string ticketNo, string contractNo, string productNo, string spid, string username, CheckProductResult checkResult)
         {
             logger.Debug("check product is called");
             if (!userService.CheckIfHasCheckPermission(username, ticketNo))
@@ -317,29 +383,18 @@ namespace checkproduct.Service
                 checkResult.netWeight, checkResult.checkMemo, contractNo, productNo);
             logger.Debug("sql: " + sql);
 
-            string spid = "";
+            //string spid = "";
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
                 conn.Execute(sql);
 
-                //获取mxd_spid
-                sql = @"select mxd_spid from yw_mxd_cmd where sghth = '{0}' and spbm = '{1}'";
-                sql = string.Format(sql, contractNo, productNo);
-                logger.Debug("sql: " + sql);
-
-                var result = conn.Query<string>(sql);
-                if (result.Count<string>() == 0)
-                {
-                    return false;
-                }
-                spid = result.First<string>();
-
                 //设置图片
+                int seq = 0;
                 foreach (string url in checkResult.addImages)
                 {
-                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz)
-                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}')";
-                    sql = string.Format(sql, ticketNo, 1, spid, DateTime.Now, url, url, "辅图", 1);
+                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz, picture_describe)
+                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}', '{8}')";
+                    sql = string.Format(sql, ticketNo, 1, spid, DateTime.Now, url, url, "辅图", seq++, contractNo);
                     logger.Debug("sql: " + sql);
 
                     conn.Execute(sql);
@@ -347,14 +402,14 @@ namespace checkproduct.Service
 
                 foreach (string url in checkResult.deleteImages)
                 {
-                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}'";
+                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}' and mxd_spid = '{2}' ";
                     int index = url.IndexOf("uploads/");
                     string fileName = url;
                     if (index != -1)
                     {
                         fileName = url.Substring(index + "uploads/".Length);
                     }
-                    sql = string.Format(sql, fileName, ticketNo);
+                    sql = string.Format(sql, fileName, ticketNo, spid);
                     logger.Debug("sql: " + sql);
 
                     conn.Execute(sql);
@@ -364,6 +419,8 @@ namespace checkproduct.Service
             }
            
         }
+
+        private int Special_SPID = 99999999;
 
         public bool Check(string ticketNo, string username, CheckProductResult checkResult)
         {
@@ -375,11 +432,38 @@ namespace checkproduct.Service
             string sql = @"update yw_mxd set yhjg = '{0}', yhms = '{1}' where mxdbh = '{2}'";
             sql = string.Format(sql, checkResult.checkResult, checkResult.checkMemo, ticketNo);
 
+  
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
                 conn.Execute(sql);
 
-                //TODO 设置图片
+                //设置图片
+                int seq = 0;
+                foreach (string url in checkResult.addImages)
+                {
+                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz)
+                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}')";
+                    sql = string.Format(sql, ticketNo, 1, Special_SPID, DateTime.Now, url, url, "辅图", seq++);
+                    logger.Debug("sql: " + sql);
+
+                    conn.Execute(sql);
+                }
+
+                foreach (string url in checkResult.deleteImages)
+                {
+                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}' and mxd_spid = '{2}' ";
+                    int index = url.IndexOf("uploads/");
+                    string fileName = url;
+                    if (index != -1)
+                    {
+                        fileName = url.Substring(index + "uploads/".Length);
+                    }
+                    sql = string.Format(sql, fileName, ticketNo, Special_SPID);
+                    logger.Debug("sql: " + sql);
+
+                    conn.Execute(sql);
+                }
+
 
                 return true;
             }

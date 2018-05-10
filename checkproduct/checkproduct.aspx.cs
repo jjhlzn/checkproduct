@@ -24,6 +24,7 @@ namespace checkproduct
             string ticketNo = Request.Params["ticketNo"];
             string contractNo = Request.Params["contractNo"];
             string productNo = Request.Params["productNo"];
+            string spid = Request.Params["spid"];
 
             CheckProductResult checkResult = new CheckProductResult();
             checkResult.checkResult = Request.Params["checkResult"];
@@ -65,7 +66,7 @@ namespace checkproduct
                 }
             }
 
-            bool isSuccess = service.CheckProduct(ticketNo, contractNo, productNo, username, checkResult);
+            bool isSuccess = service.CheckProduct(ticketNo, contractNo, productNo, spid, username, checkResult);
 
             var resp = new
             {

@@ -5,11 +5,13 @@ using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
 using System.Web.Routing;
+using log4net;
 
 namespace checkproduct
 {
     public class Global : System.Web.HttpApplication
     {
+        private ILog logger = LogManager.GetLogger(typeof(Global));
 
         protected void Application_Start(object sender, EventArgs e)
         {
@@ -33,7 +35,12 @@ namespace checkproduct
 
         protected void Application_Error(object sender, EventArgs e)
         {
+            Exception exc = Server.GetLastError();
 
+            if (exc is HttpUnhandledException)
+            {
+                logger.Fatal(exc);
+            }
         }
 
         protected void Session_End(object sender, EventArgs e)

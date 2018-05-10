@@ -7,6 +7,7 @@ using System.Web.UI.WebControls;
 using checkproduct.DomainModel;
 using checkproduct.Service;
 using Newtonsoft.Json;
+using log4net;
 
 namespace checkproduct
 {
@@ -14,12 +15,19 @@ namespace checkproduct
     {
         private CheckOrderService checkOrderService = new CheckOrderService();
 
+        private ILog logger = LogManager.GetLogger(typeof(getproductinfo));
+
         protected void Page_Load(object sender, EventArgs e)
         {
+            string ticketNo = Request.Params["ticketNo"];
             string contractNo = Request.Params["contractNo"];
             string productNo = Request.Params["productNo"];
-            Product product = checkOrderService.GetProductInfo(contractNo, productNo);
+            string spid = Request.Params["spid"];
 
+            logger.Debug(string.Format("ticketNo = {0}, contractNo = {1}, productNo = {2}, spid = {3}", ticketNo, contractNo, productNo, spid));
+
+            Product product = checkOrderService.GetProductInfo(ticketNo, contractNo, productNo, spid);
+              
             /*
             List<string> urls = new List<string>();
             foreach(string url in product.pictureUrls)

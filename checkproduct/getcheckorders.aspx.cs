@@ -29,14 +29,15 @@ namespace checkproduct
             string endDate = Request.Params["endDate"];
             string status = Request.Params["status"];
             string pageNo = Request.Params["pageNo"];
+            string checker = Request.Params["checker"];
 
-            string str = string.Format(@"ticketNo = {0}, startDate = {1}, endDate = {2}, status = {3}, pageNo = {4}, username = {5}",
-                ticketNo, startDate, endDate, status, pageNo, username);
+            string str = string.Format(@"ticketNo = {0}, startDate = {1}, endDate = {2}, status = {3}, pageNo = {4}, username = {5}, checker = {6}",
+                ticketNo, startDate, endDate, status, pageNo, username, checker);
             logger.Debug("params: " + str);
 
             pageInfo.pageNo = int.Parse(pageNo);
 
-            GetCheckOrdersResult checkOrdersResult = checkOrderService.GetCheckOrders(DateTime.Now, DateTime.Now, status, username, pageInfo, ticketNo);
+            GetCheckOrdersResult checkOrdersResult = checkOrderService.GetCheckOrders(DateTime.Now, DateTime.Now, status, username,checker, pageInfo, ticketNo);
 
             var resp = new
             {

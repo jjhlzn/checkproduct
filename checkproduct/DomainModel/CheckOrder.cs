@@ -18,6 +18,8 @@ namespace checkproduct.DomainModel
         public string outDate;
         public string status;
 
+        public int productCount; //验货单的所有合同下面的货物的种数之和
+
         public int qualifiedCount;
         public int notQualifiedCount;
         public int notCheckCount;
@@ -46,6 +48,7 @@ namespace checkproduct.DomainModel
         public string spid;
         public string productNo;
         public string name;
+        public string totalCount = "0"; //总箱数
         public string pickCount; //抽箱数
         public string boxSize; //外箱尺寸
         public string grossWeight; //单件毛重

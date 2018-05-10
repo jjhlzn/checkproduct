@@ -13,7 +13,10 @@
       <publishTime>01/23/2018 21:35:25</publishTime>
     </File>
     <File Include="bin/checkproduct.dll">
-      <publishTime>02/02/2018 16:44:24</publishTime>
+      <publishTime>05/10/2018 08:59:53</publishTime>
+    </File>
+    <File Include="bin/checkproduct.pdb">
+      <publishTime>05/10/2018 08:59:53</publishTime>
     </File>
     <File Include="bin/Dapper.dll">
       <publishTime>07/22/2016 14:52:40</publishTime>
@@ -106,7 +109,7 @@
       <publishTime>12/19/2017 14:28:57</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>01/27/2018 17:37:21</publishTime>
+      <publishTime>02/02/2018 17:26:16</publishTime>
     </File>
   </ItemGroup>
 </Project>
