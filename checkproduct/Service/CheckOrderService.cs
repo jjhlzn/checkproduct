@@ -18,7 +18,11 @@ namespace checkproduct.Service
     {
         private static ILog logger = LogManager.GetLogger(typeof(CheckOrderService));
         private UserService userService = new UserService();
+        private int Special_SPID = 99999999;
 
+        /**
+         * 获取验货单的列表
+         * */
         public GetCheckOrdersResult GetCheckOrders(DateTime startDate, DateTime endDate, string status, string username, string checker,
             PageInfo pageInfo, string keyword = "")
         {
@@ -67,12 +71,12 @@ namespace checkproduct.Service
 
             if ( !string.IsNullOrEmpty(keyword))
             {
-                whereClause += " and yw_mxd.mxdbh like '%" + keyword + "%' ";
+                whereClause += " and (yw_mxd.mxdbh like '%" + keyword + "%' or yw_mxd_yhsqd.jcbh like '%" + keyword + "%') ";
             }
 
             string sql = "";
             
-            sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh, 
+            sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh as jinCangNo, 
                             (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
                             (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker,
                             (   select COUNT(*) from (
@@ -111,83 +115,10 @@ namespace checkproduct.Service
         }
 
 
-        private class C
-        {
-            public string ticketNo;
-            public string checkResult;
-            public int checkCount = 0;
-        }
-        private void SetCheckResultStatus(List<CheckOrder> orders)
-        {
-            if (orders.Count == 0)
-                return;
 
-            string ordersStr = "(";
-            foreach(CheckOrder order in orders)
-            {
-                ordersStr += string.Format("'{0}',", order.ticketNo);
-            }
-            ordersStr = ordersStr.Substring(0, ordersStr.Length - 1);
-            ordersStr += ")";
-            using (IDbConnection conn = ConnectionFactory.GetInstance())
-            {
-                string sql = @" select ticketNo, checkResult, SUM(checkCount) as checkCount from (                        
-  select 
-                                    mxdbh as ticketNo, 
-                                    sghth,
-                                    yhjg as checkResult, 
-                                    COUNT(*) as checkCount 
-                               from (select distinct yw_mxd_cmd.mxdbh, yw_mxd_cmd.sghth, mxd_spid, yw_mxd_cmd.yhjg from yw_mxd_cmd, yw_mxd
-                                      where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh 
-											and yw_mxd.mxdbh in " + ordersStr  + @"
-											and  bb_flag = 'Y') as a group by yhjg, mxdbh, sghth) as b group by ticketNo, checkResult";
-                /*
-                string sql = @"select 
-                                    mxdbh as ticketNo, 
-                                    yhjg as checkResult, 
-                                    COUNT(*) as checkCount 
-                               from (select distinct mxdbh, spbm, yhjg from yw_mxd_cmd 
-                                      where mxdbh in " + ordersStr + " ) as a group by yhjg, mxdbh"; */
-                logger.Debug("sql: " + sql);
-                var resultSet = conn.Query<C>(sql);
-                foreach(C result in resultSet)
-                {
-                    foreach(CheckOrder order in orders)
-                    {
-                        if (order.ticketNo == result.ticketNo)
-                        {
-                            if (string.IsNullOrEmpty(result.checkResult)) {
-                                order.notCheckCount += result.checkCount;
-                            } else
-                            {
-                                //未验货 = 未完成 + 未验货
-                                switch(result.checkResult)
-                                {
-                                    case "合格":
-                                        order.qualifiedCount = result.checkCount;
-                                        break;
-                                    case "不合格":
-                                        order.notQualifiedCount = result.checkCount;
-                                        break;
-                                    case "未验":
-                                        order.notCheckCount += result.checkCount;
-                                        break;
-                                    case "待定":
-                                        order.tbdCount += result.checkCount;
-                                        break;
-                                    case "未完成":
-                                        order.notCheckCount += result.checkCount;
-                                        break;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-
-            }
-        }
-
+       /**
+        * 分配验货员
+        */ 
         public bool AssignChecker(string ticketNo, string checker)
         {
             string sql = "update yw_mxd_yhsqd set yhy = '{0}' where mxdbh = '{1}'";
@@ -199,8 +130,11 @@ namespace checkproduct.Service
                 conn.Execute(sql);
                 return true;
             }
-        }  
+        }
 
+        /**
+        * 获取验货单的合同号列表
+        * */
         public List<CheckOrderContract> GetCheckOrderContracts(string ticketNo)
         {
             string sql = @"select distinct sghth as contractNo, 
@@ -217,6 +151,9 @@ namespace checkproduct.Service
             }
         }
 
+        /**
+         * 获取合同号的货物列表
+         * */
         public List<Product> GetContractProducts(string ticketNo, string contractNo)
         {
             string sql = @"select spid, 
@@ -234,10 +171,14 @@ namespace checkproduct.Service
                 var products = conn.Query<Product>(sql);
                 return products.AsList<Product>();
             }
-            
         }
 
-        public List<Product> GetProducts(string ticketNo, string type)
+
+        /**
+         * 获取验货单的某种验货结果的所有货物列表（在已验货中使用）
+         * 
+         * */
+        public List<Product> GetProducts(string ticketNo, string checkResult)
         {
             string sql = @"  select  distinct
             yw_mxd_cmd.mxdbh as ticketNo, 
@@ -254,9 +195,9 @@ namespace checkproduct.Service
   select distinct mxd_spid as spid 
                             from yw_mxd_cmd where yw_mxd.bb_flag = 'Y'  and mxdbh = '{0}') ";
 
-            if (type != "全部")
+            if (checkResult != "全部")
             {
-                sql += " and yw_mxd_cmd.yhjg = '" + type + "' ";
+                sql += " and yw_mxd_cmd.yhjg = '" + checkResult + "' ";
             }
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
@@ -269,18 +210,24 @@ namespace checkproduct.Service
 
         }
 
-
+        /**
+         * 获取验货单的信息
+         * */
         public CheckOrder GetCheckOrderInfo(string ticketNo)
         {
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
-                string sql = @"select Top 1 yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh, 
-                                       (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
-                                       (select name from rs_employee where e_no in (select top 1 zdr from yw_mxd where mxdbh = '{0}' order by yw_mxd.bbh desc)) as tracker,
-                                        yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate,
-                                        yw_mxd.yhjg as checkResult, yw_mxd.yhms as checkMemo
+                string sql = @"select Top 1 
+                                      yw_mxd.mxdbh as ticketNo, 
+                                      yw_mxd_yhsqd.jcbh, 
+                                      (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
+                                      (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker,
+                                       yw_mxd_yhsqd.yjckrq as outDate, 
+                                       yw_mxd_yhsqd.yhrq as checkDate,
+                                       yw_mxd.yhjg as checkResult, 
+                                       yw_mxd.yhms as checkMemo
                                 FROM yw_mxd with (nolock) ,yw_mxd_yhsqd 
-                                where yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd.bb_flag = 'Y'
+                                where yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd.bbh = yw_mxd_yhsqd.bbh  and yw_mxd.bb_flag = 'Y'
                                 order by yw_mxd_yhsqd.bbh desc";
                 sql = string.Format(sql, ticketNo);
                 logger.Debug("sql: " + sql);
@@ -302,6 +249,10 @@ namespace checkproduct.Service
            
         }
 
+        /**
+         * 获取合同号信息
+         * 
+         * */
         public CheckOrderContract GetContractInfo(string ticketNo, string contractNo)
         {
             CheckOrderContract contract = new CheckOrderContract();
@@ -335,19 +286,24 @@ namespace checkproduct.Service
             return contract;
         }
 
+        /**
+         * 获取产品信息
+         * 
+         */
         public Product GetProductInfo(string ticketNo, string contractNo, string productNo, string spid)
         {
-            string sql = @"select mxdbh as ticketNo, 
-                                  bzjs as totalCount, 
-                                  mxd_spid as spid, 
-                                  bzjs_cy as pickCount, 
-                                  yhjg as checkResult, 
+            string sql = @"select yw_mxd_cmd.mxdbh as ticketNo, 
+                                  yw_mxd_cmd.bzjs as totalCount, 
+                                  yw_mxd_cmd.mxd_spid as spid, 
+                                  yw_mxd_cmd.bzjs_cy as pickCount, 
+                                  yw_mxd_cmd.yhjg as checkResult, 
                                   yw_mxd_cmd.djtjms as boxSize, 
                                   yw_mxd_cmd.mjmz as grossWeight, 
                                   yw_mxd_cmd.mjjz as netWeight, 
                                   yw_mxd_cmd.yhms as checkMemo 
-                            from yw_mxd_cmd 
-                                  where  sghth = '{0}' and spbm = '{1}' and mxd_spid = '{2}' and mxdbh = '{3}' ";
+                            from yw_mxd_cmd, yw_mxd 
+                                  where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and yw_mxd.bbh = yw_mxd_cmd.bbh 
+                                            and sghth = '{0}' and spbm = '{1}' and mxd_spid = '{2}' and yw_mxd.mxdbh = '{3}' ";
             sql = string.Format(sql, contractNo, productNo, spid, ticketNo);
             logger.Debug("sql: " + sql);
 
@@ -367,6 +323,10 @@ namespace checkproduct.Service
             }
         }
 
+
+        /**
+         * 验产品 
+         */
         public bool CheckProduct(string ticketNo, string contractNo, string productNo, string spid, string username, CheckProductResult checkResult)
         {
             logger.Debug("check product is called");
@@ -420,8 +380,10 @@ namespace checkproduct.Service
            
         }
 
-        private int Special_SPID = 99999999;
 
+        /**
+         * 整体验货 
+         */
         public bool Check(string ticketNo, string username, CheckProductResult checkResult)
         {
             if (!userService.CheckIfHasCheckPermission(username, ticketNo))
@@ -468,5 +430,86 @@ namespace checkproduct.Service
                 return true;
             }
         }
+
+        /*********************** private method *******************/
+        private class C
+        {
+            public string ticketNo;
+            public string checkResult;
+            public int checkCount = 0;
+        }
+        private void SetCheckResultStatus(List<CheckOrder> orders)
+        {
+            if (orders.Count == 0)
+                return;
+
+            string ordersStr = "(";
+            foreach (CheckOrder order in orders)
+            {
+                ordersStr += string.Format("'{0}',", order.ticketNo);
+            }
+            ordersStr = ordersStr.Substring(0, ordersStr.Length - 1);
+            ordersStr += ")";
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                string sql = @" select ticketNo, checkResult, SUM(checkCount) as checkCount from (                        
+  select 
+                                    mxdbh as ticketNo, 
+                                    sghth,
+                                    yhjg as checkResult, 
+                                    COUNT(*) as checkCount 
+                               from (select distinct yw_mxd_cmd.mxdbh, yw_mxd_cmd.sghth, mxd_spid, yw_mxd_cmd.yhjg from yw_mxd_cmd, yw_mxd
+                                      where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh 
+											and yw_mxd.mxdbh in " + ordersStr + @"
+											and  bb_flag = 'Y') as a group by yhjg, mxdbh, sghth) as b group by ticketNo, checkResult";
+                /*
+                string sql = @"select 
+                                    mxdbh as ticketNo, 
+                                    yhjg as checkResult, 
+                                    COUNT(*) as checkCount 
+                               from (select distinct mxdbh, spbm, yhjg from yw_mxd_cmd 
+                                      where mxdbh in " + ordersStr + " ) as a group by yhjg, mxdbh"; */
+                logger.Debug("sql: " + sql);
+                var resultSet = conn.Query<C>(sql);
+                foreach (C result in resultSet)
+                {
+                    foreach (CheckOrder order in orders)
+                    {
+                        if (order.ticketNo == result.ticketNo)
+                        {
+                            if (string.IsNullOrEmpty(result.checkResult))
+                            {
+                                order.notCheckCount += result.checkCount;
+                            }
+                            else
+                            {
+                                //未验货 = 未完成 + 未验货
+                                switch (result.checkResult)
+                                {
+                                    case "合格":
+                                        order.qualifiedCount = result.checkCount;
+                                        break;
+                                    case "不合格":
+                                        order.notQualifiedCount = result.checkCount;
+                                        break;
+                                    case "未验":
+                                        order.notCheckCount += result.checkCount;
+                                        break;
+                                    case "待定":
+                                        order.tbdCount += result.checkCount;
+                                        break;
+                                    case "未完成":
+                                        order.notCheckCount += result.checkCount;
+                                        break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+
     }
 }

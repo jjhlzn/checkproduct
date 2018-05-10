@@ -17,6 +17,7 @@ namespace checkproduct.DomainModel
         public string checker;
         public string outDate;
         public string status;
+        public string jinCangNo; //进仓编号
 
         public int productCount; //验货单的所有合同下面的货物的种数之和
 
