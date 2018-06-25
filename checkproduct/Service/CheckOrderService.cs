@@ -40,6 +40,7 @@ namespace checkproduct.Service
                                      ( yw_mxd.bbh = yw_mxd_yhsqd.bbh ) and
                                      ( yw_mxd.bb_flag = 'Y' ) ";
 
+            whereClause += " and yw_mxd_yhsqd.yhfs = '我司验货' ";
 
             if (status == CheckOrder.Status_Not_Assign) {
                 whereClause += " and (yw_mxd_yhsqd.yhy is null or yw_mxd_yhsqd.yhy = '')";
@@ -71,7 +72,10 @@ namespace checkproduct.Service
 
             if ( !string.IsNullOrEmpty(keyword))
             {
-                whereClause += " and (yw_mxd.mxdbh like '%" + keyword + "%' or yw_mxd_yhsqd.jcbh like '%" + keyword + "%') ";
+                whereClause
+                    += " and (yw_mxd.mxdbh  like '%" + keyword + "%' or yw_mxd_yhsqd.jcbh like '%" + keyword + @"%' or 
+                        (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) like  '%" + keyword + @"%'
+                    ) ";
             }
 
             string sql = "";
@@ -79,10 +83,18 @@ namespace checkproduct.Service
             sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh as jinCangNo, 
                             (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
                             (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker,
-                            (   select COUNT(*) from (
-                                select distinct sghth, mxd_spid  from yw_mxd_cmd aa where sghth in (
+
+                            (select COUNT(*) from (
+                                select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
-                              from yw_mxd_cmd where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh) as a) as productCount,
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh) as a) as productCount,
+                                
+                            (select COUNT(*) from (
+                                select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
+                            select distinct sghth as contractNo 
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.yhjg in ('合格','不合格')) as a) as checkedProductCount,  
+
+
                             yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate,
                             yw_mxd.yhjg as checkResult, yw_mxd.yhms as checkMemo
                                 FROM yw_mxd with (nolock) ,yw_mxd_yhsqd      
@@ -138,9 +150,12 @@ namespace checkproduct.Service
         public List<CheckOrderContract> GetCheckOrderContracts(string ticketNo)
         {
             string sql = @"select distinct sghth as contractNo, 
-(select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
-                            (select name from rs_employee where e_no in (select top 1 zdr from yw_mxd where mxdbh = '{0}' order by yw_mxd.bbh desc)) as tracker
-                          from yw_mxd_cmd, yw_mxd where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh and yw_mxd_cmd.bbh = yw_mxd.bbh and yw_mxd.bb_flag = 'Y' and yw_mxd.mxdbh = '{0}'";
+(select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, 
+            yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
+                            (select name from rs_employee where e_no in (select top 1 zdr from yw_mxd where mxdbh = '{0}' order by yw_mxd.bbh desc)) as tracker,
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth) as a) as productCount,
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and yhjg in ('合格', '不合格')) as a) as checkedProductCount
+                          from yw_mxd_cmd_yh, yw_mxd where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and yw_mxd.bb_flag = 'Y' and yw_mxd.mxdbh = '{0}'";
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
 
@@ -157,12 +172,12 @@ namespace checkproduct.Service
         public List<Product> GetContractProducts(string ticketNo, string contractNo)
         {
             string sql = @"select spid, 
-                           (select top 1 spzwmc from yw_mxd_cmd where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as name,
-                           (select top 1 spbm from yw_mxd_cmd where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as productNo,
-                            (select top 1 yhjg from yw_mxd_cmd where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as checkResult
+                           (select top 1 spzwmc from yw_mxd_cmd_yh where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as name,
+                           (select top 1 sphh_kh from yw_mxd_cmd_yh where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as productNo,
+                            (select top 1 yhjg from yw_mxd_cmd_yh where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as checkResult
                            from (                         
                           select distinct mxd_spid as spid 
-                                                    from yw_mxd_cmd where sghth = '{0}' and mxdbh = '{1}') as a";
+                                                    from yw_mxd_cmd_yh where sghth = '{0}' and mxdbh = '{1}') as a";
             sql = string.Format(sql, contractNo, ticketNo);
             logger.Debug("sql: " + sql);
 
@@ -181,23 +196,23 @@ namespace checkproduct.Service
         public List<Product> GetProducts(string ticketNo, string checkResult)
         {
             string sql = @"  select  distinct
-            yw_mxd_cmd.mxdbh as ticketNo, 
-            (select top 1 a.spzwmc from yw_mxd_cmd as a where a.mxd_spid = yw_mxd_cmd.mxd_spid and a.sghth = yw_mxd_cmd.sghth and a.mxdbh = yw_mxd_cmd.mxdbh order by a.bbh desc) as name,
-            (select top 1 a.spbm from yw_mxd_cmd as a where a.mxd_spid = yw_mxd_cmd.mxd_spid and a.sghth = yw_mxd_cmd.sghth and a.mxdbh = yw_mxd_cmd.mxdbh order by a.bbh desc) as productNo,
-            (select top 1 a.yhjg from yw_mxd_cmd as a where a.mxd_spid = yw_mxd_cmd.mxd_spid and a.sghth = yw_mxd_cmd.sghth and a.mxdbh = yw_mxd_cmd.mxdbh order by a.bbh desc) as checkResult,
-            yw_mxd_cmd.sghth as contractNo,
+            yw_mxd_cmd_yh.mxdbh as ticketNo, 
+            (select top 1 a.spzwmc from yw_mxd_cmd_yh as a where a.mxd_spid = yw_mxd_cmd_yh.mxd_spid and a.sghth = yw_mxd_cmd_yh.sghth and a.mxdbh = yw_mxd_cmd_yh.mxdbh order by a.bbh desc) as name,
+            (select top 1 a.sphh_kh from yw_mxd_cmd_yh as a where a.mxd_spid = yw_mxd_cmd_yh.mxd_spid and a.sghth = yw_mxd_cmd_yh.sghth and a.mxdbh = yw_mxd_cmd_yh.mxdbh order by a.bbh desc) as productNo,
+            (select top 1 a.yhjg from yw_mxd_cmd_yh as a where a.mxd_spid = yw_mxd_cmd_yh.mxd_spid and a.sghth = yw_mxd_cmd_yh.sghth and a.mxdbh = yw_mxd_cmd_yh.mxdbh order by a.bbh desc) as checkResult,
+            yw_mxd_cmd_yh.sghth as contractNo,
             mxd_spid as spid,
             (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
             (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker
-           from yw_mxd_cmd, yw_mxd
-           where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd_cmd.bbh = yw_mxd.bbh and  yw_mxd.bb_flag = 'Y' 
+           from yw_mxd_cmd_yh, yw_mxd
+           where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and  yw_mxd.bb_flag = 'Y' 
             and mxd_spid in (                         
   select distinct mxd_spid as spid 
-                            from yw_mxd_cmd where yw_mxd.bb_flag = 'Y'  and mxdbh = '{0}') ";
+                            from yw_mxd_cmd_yh where yw_mxd.bb_flag = 'Y'  and mxdbh = '{0}') ";
 
             if (checkResult != "全部")
             {
-                sql += " and yw_mxd_cmd.yhjg = '" + checkResult + "' ";
+                sql += " and yw_mxd_cmd_yh.yhjg = '" + checkResult + "' ";
             }
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
@@ -222,6 +237,17 @@ namespace checkproduct.Service
                                       yw_mxd_yhsqd.jcbh, 
                                       (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
                                       (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker,
+
+                                       (select COUNT(*) from (
+                                            select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
+                                        select distinct sghth as contractNo 
+                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh) as a) as productCount,
+                                
+                                        (select COUNT(*) from (
+                                            select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
+                                        select distinct sghth as contractNo 
+                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.yhjg in ('合格','不合格')) as a) as checkedProductCount,  
+
                                        yw_mxd_yhsqd.yjckrq as outDate, 
                                        yw_mxd_yhsqd.yhrq as checkDate,
                                        yw_mxd.yhjg as checkResult, 
@@ -242,7 +268,15 @@ namespace checkproduct.Service
                     logger.Debug("sql: " + sql);
                     var pictureUrls = conn.Query<string>(sql);
                     checkOrder.pictureUrls = pictureUrls.AsList<string>();
+
+
+                    List<CheckOrder> orders = new List<CheckOrder>();
+                    orders.Add(checkOrder);
+                    SetCheckResultStatus(orders);
                 }
+
+             
+
                 return checkOrder;
             }
 
@@ -292,18 +326,18 @@ namespace checkproduct.Service
          */
         public Product GetProductInfo(string ticketNo, string contractNo, string productNo, string spid)
         {
-            string sql = @"select yw_mxd_cmd.mxdbh as ticketNo, 
-                                  yw_mxd_cmd.bzjs as totalCount, 
-                                  yw_mxd_cmd.mxd_spid as spid, 
-                                  yw_mxd_cmd.bzjs_cy as pickCount, 
-                                  yw_mxd_cmd.yhjg as checkResult, 
-                                  yw_mxd_cmd.djtjms as boxSize, 
-                                  yw_mxd_cmd.mjmz as grossWeight, 
-                                  yw_mxd_cmd.mjjz as netWeight, 
-                                  yw_mxd_cmd.yhms as checkMemo 
-                            from yw_mxd_cmd, yw_mxd 
-                                  where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and yw_mxd.bbh = yw_mxd_cmd.bbh 
-                                            and sghth = '{0}' and spbm = '{1}' and mxd_spid = '{2}' and yw_mxd.mxdbh = '{3}' ";
+            string sql = @"select yw_mxd_cmd_yh.mxdbh as ticketNo, 
+                                  yw_mxd_cmd_yh.bzjs as totalCount, 
+                                  yw_mxd_cmd_yh.mxd_spid as spid, 
+                                  yw_mxd_cmd_yh.bzjs_cy as pickCount, 
+                                  yw_mxd_cmd_yh.yhjg as checkResult, 
+                                  yw_mxd_cmd_yh.djtjms as boxSize, 
+                                  yw_mxd_cmd_yh.mjmz as grossWeight, 
+                                  yw_mxd_cmd_yh.mjjz as netWeight, 
+                                  yw_mxd_cmd_yh.yhms as checkMemo 
+                            from yw_mxd_cmd_yh, yw_mxd 
+                                  where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and yw_mxd.bbh = yw_mxd_cmd_yh.bbh 
+                                            and sghth = '{0}' and sphh_kh = '{1}' and mxd_spid = '{2}' and yw_mxd.mxdbh = '{3}' ";
             sql = string.Format(sql, contractNo, productNo, spid, ticketNo);
             logger.Debug("sql: " + sql);
 
@@ -336,11 +370,11 @@ namespace checkproduct.Service
             }
 
             //设置值
-            string sql = @"update yw_mxd_cmd set bzjs_cy = '{0}', yhjg = '{1}', djtjms = '{2}', mjmz = '{3}', mjjz = '{4}', yhms = '{5}'
-                            where sghth = '{6}' and spbm = '{7}'";
+            string sql = @"update yw_mxd_cmd_yh set bzjs_cy = '{0}', yhjg = '{1}', djtjms = '{2}', mjmz = '{3}', mjjz = '{4}', yhms = '{5}'
+                            where sghth = '{6}' and sphh_kh = '{7}' and mxd_spid = '{8}'";
 
             sql = string.Format(sql, checkResult.pickCount, checkResult.checkResult, checkResult.boxSize, checkResult.grossWeight,
-                checkResult.netWeight, checkResult.checkMemo, contractNo, productNo);
+                checkResult.netWeight, checkResult.checkMemo, contractNo, productNo, spid);
             logger.Debug("sql: " + sql);
 
             //string spid = "";
@@ -458,17 +492,11 @@ namespace checkproduct.Service
                                     sghth,
                                     yhjg as checkResult, 
                                     COUNT(*) as checkCount 
-                               from (select distinct yw_mxd_cmd.mxdbh, yw_mxd_cmd.sghth, mxd_spid, yw_mxd_cmd.yhjg from yw_mxd_cmd, yw_mxd
-                                      where yw_mxd_cmd.mxdbh = yw_mxd.mxdbh 
+                               from (select distinct yw_mxd_cmd_yh.mxdbh, yw_mxd_cmd_yh.sghth, mxd_spid, yw_mxd_cmd_yh.yhjg from yw_mxd_cmd_yh, yw_mxd
+                                      where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh 
 											and yw_mxd.mxdbh in " + ordersStr + @"
 											and  bb_flag = 'Y') as a group by yhjg, mxdbh, sghth) as b group by ticketNo, checkResult";
-                /*
-                string sql = @"select 
-                                    mxdbh as ticketNo, 
-                                    yhjg as checkResult, 
-                                    COUNT(*) as checkCount 
-                               from (select distinct mxdbh, spbm, yhjg from yw_mxd_cmd 
-                                      where mxdbh in " + ordersStr + " ) as a group by yhjg, mxdbh"; */
+
                 logger.Debug("sql: " + sql);
                 var resultSet = conn.Query<C>(sql);
                 foreach (C result in resultSet)

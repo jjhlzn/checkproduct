@@ -20,6 +20,7 @@ namespace checkproduct.DomainModel
         public string jinCangNo; //进仓编号
 
         public int productCount; //验货单的所有合同下面的货物的种数之和
+        public int checkedProductCount; //验货单的所有合同下面的货物的种数之和, 并且已经验货的货物种数之和
 
         public int qualifiedCount;
         public int notQualifiedCount;
@@ -39,6 +40,8 @@ namespace checkproduct.DomainModel
         public string tracker;
         public string checker;
         public string deadlineDate;
+        public int productCount;
+        public int checkedProductCount;
         public List<Product> products = new List<Product>();
     }
 

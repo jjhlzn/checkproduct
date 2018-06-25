@@ -26,6 +26,8 @@ namespace checkproduct
             string productNo = Request.Params["productNo"];
             string spid = Request.Params["spid"];
 
+            logger.Debug("ticketNo = " + ticketNo + ", controctNo = " + contractNo + ", productNo = " + productNo + ", spdi = " + spid);
+
             CheckProductResult checkResult = new CheckProductResult();
             checkResult.checkResult = Request.Params["checkResult"];
             if (string.IsNullOrEmpty(checkResult.checkResult) || checkResult.checkResult == "null")
