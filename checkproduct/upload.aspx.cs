@@ -23,6 +23,7 @@ namespace checkproduct
 
                 String[] paths = new String[Request.Files.Count];
                 string[] originNames = new String[Request.Files.Count];
+                string type = Request.Form["type"];
 
                 logger.Debug(Request.Files);
 

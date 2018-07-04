@@ -29,6 +29,7 @@ namespace checkproduct
             string endDate = Request.Params["endDate"];
             string status = Request.Params["status"];
             string pageNo = Request.Params["pageNo"];
+            string pageSize = Request.Params["pageSize"];
             string checker = Request.Params["checker"];
 
             string str = string.Format(@"ticketNo = {0}, startDate = {1}, endDate = {2}, status = {3}, pageNo = {4}, username = {5}, checker = {6}",
@@ -36,6 +37,7 @@ namespace checkproduct
             logger.Debug("params: " + str);
 
             pageInfo.pageNo = int.Parse(pageNo);
+            pageInfo.pageSize = int.Parse(pageSize);
 
             GetCheckOrdersResult checkOrdersResult = checkOrderService.GetCheckOrders(DateTime.Now, DateTime.Now, status, username,checker, pageInfo, ticketNo);
 

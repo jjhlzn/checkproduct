@@ -84,6 +84,8 @@
     <Content Include="Global.asax" />
     <Content Include="index.html" />
     <Content Include="login.aspx" />
+    <Content Include="productpicture.aspx" />
+    <Content Include="saveziliaoku.aspx" />
     <Content Include="test.aspx" />
     <Content Include="upload.aspx" />
     <Content Include="Web.config" />
@@ -171,7 +173,21 @@
     <Compile Include="login.aspx.designer.cs">
       <DependentUpon>login.aspx</DependentUpon>
     </Compile>
+    <Compile Include="productpicture.aspx.cs">
+      <DependentUpon>productpicture.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="productpicture.aspx.designer.cs">
+      <DependentUpon>productpicture.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="saveziliaoku.aspx.cs">
+      <DependentUpon>saveziliaoku.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="saveziliaoku.aspx.designer.cs">
+      <DependentUpon>saveziliaoku.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Service\CheckOrderService.cs" />
     <Compile Include="Service\UserService.cs" />
     <Compile Include="test.aspx.cs">

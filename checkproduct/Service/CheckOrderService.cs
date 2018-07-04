@@ -16,6 +16,8 @@ namespace checkproduct.Service
     }
     public class CheckOrderService
     {
+        private static string IMAGETYPE_ZLK = "ziliaoku";
+        private static string IMAGETYPE_CHECK = "check";
         private static ILog logger = LogManager.GetLogger(typeof(CheckOrderService));
         private UserService userService = new UserService();
         private int Special_SPID = 99999999;
@@ -42,15 +44,35 @@ namespace checkproduct.Service
 
             whereClause += " and yw_mxd_yhsqd.yhfs = '我司验货' ";
 
-            if (status == CheckOrder.Status_Not_Assign) {
+            if (status == CheckOrder.Status_Not_Assign)
+            {
                 whereClause += " and (yw_mxd_yhsqd.yhy is null or yw_mxd_yhsqd.yhy = '')";
-            } else if (status == CheckOrder.Status_Has_Checked) {
+            }
+            else if (status == CheckOrder.Status_Has_Checked)
+            {
                 whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '') and yw_mxd.yhjg = '完成'";
-            } else if (status == CheckOrder.Status_Not_Complete) {
-                whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '') and yw_mxd.yhjg = '未完成'";
-            } else if (status == CheckOrder.Status_Not_Check) {
-                whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '') and yw_mxd.yhjg is null";
-            } else {
+            }
+            else if (status == CheckOrder.Status_Not_Complete)
+            {
+                //whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '') and yw_mxd.yhjg = '未完成'";
+            }
+            else if (status == CheckOrder.Status_Not_Check)
+            {
+                whereClause += " and (yw_mxd_yhsqd.yhy is not null and yw_mxd_yhsqd.yhy != '') and (yw_mxd.yhjg is null or yw_mxd.yhjg = '未完成')";
+            }
+            else if (status == CheckOrder.Status_All)
+            {
+                whereClause += @" and (select COUNT(*) from (
+                                select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
+                            select distinct sghth as contractNo 
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh) as a)
+                              
+                              > (select COUNT(distinct mxd_spid) from yw_mxd_yhmx_picture where  
+             yw_mxd_yhmx_picture.mxdbh = yw_mxd_yhsqd.mxdbh and imagetype = '"+IMAGETYPE_ZLK+"') ";
+
+            }
+            else
+            {
                 logger.Fatal("not known status: " + status);
                 return null;
             }
@@ -83,7 +105,7 @@ namespace checkproduct.Service
             sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh as jinCangNo, 
                             (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
                             (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker,
-
+                            
                             (select COUNT(*) from (
                                 select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
@@ -92,9 +114,12 @@ namespace checkproduct.Service
                             (select COUNT(*) from (
                                 select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
-                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.yhjg in ('合格','不合格')) as a) as checkedProductCount,  
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
+                            
+(select COUNT(distinct mxd_spid) from yw_mxd_yhmx_picture where  
+             yw_mxd_yhmx_picture.mxdbh = yw_mxd_yhsqd.mxdbh and imagetype = '" + IMAGETYPE_ZLK + @"') as hasZlkImageProductCount,
 
-
+                            yw_mxd_yhsqd.zysx as announcements,
                             yw_mxd_yhsqd.yjckrq as outDate, yw_mxd_yhsqd.yhrq as checkDate,
                             yw_mxd.yhjg as checkResult, yw_mxd.yhms as checkMemo
                                 FROM yw_mxd with (nolock) ,yw_mxd_yhsqd      
@@ -154,7 +179,7 @@ namespace checkproduct.Service
             yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
                             (select name from rs_employee where e_no in (select top 1 zdr from yw_mxd where mxdbh = '{0}' order by yw_mxd.bbh desc)) as tracker,
    (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth) as a) as productCount,
-   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and yhjg in ('合格', '不合格')) as a) as checkedProductCount
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and yhjg in ('合格', '不合格', '待定')) as a) as checkedProductCount
                           from yw_mxd_cmd_yh, yw_mxd where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and yw_mxd.bb_flag = 'Y' and yw_mxd.mxdbh = '{0}'";
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
@@ -190,7 +215,7 @@ namespace checkproduct.Service
 
 
         /**
-         * 获取验货单的某种验货结果的所有货物列表（在已验货中使用）
+         * 获取验货单的某种验货结果的所有货物列表（在已验货 和 资料库 中使用）
          * 
          * */
         public List<Product> GetProducts(string ticketNo, string checkResult)
@@ -201,6 +226,8 @@ namespace checkproduct.Service
             (select top 1 a.sphh_kh from yw_mxd_cmd_yh as a where a.mxd_spid = yw_mxd_cmd_yh.mxd_spid and a.sghth = yw_mxd_cmd_yh.sghth and a.mxdbh = yw_mxd_cmd_yh.mxdbh order by a.bbh desc) as productNo,
             (select top 1 a.yhjg from yw_mxd_cmd_yh as a where a.mxd_spid = yw_mxd_cmd_yh.mxd_spid and a.sghth = yw_mxd_cmd_yh.sghth and a.mxdbh = yw_mxd_cmd_yh.mxdbh order by a.bbh desc) as checkResult,
             yw_mxd_cmd_yh.sghth as contractNo,
+            (select COUNT(*) from yw_mxd_yhmx_picture where yw_mxd_yhmx_picture.mxd_spid = yw_mxd_cmd_yh.mxd_spid 
+            and yw_mxd_yhmx_picture.mxdbh = yw_mxd_cmd_yh.mxdbh and imagetype = '"+ IMAGETYPE_ZLK + @"') as zlkImagesCount,
             mxd_spid as spid,
             (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
             (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker
@@ -246,7 +273,7 @@ namespace checkproduct.Service
                                         (select COUNT(*) from (
                                             select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                                         select distinct sghth as contractNo 
-                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.yhjg in ('合格','不合格')) as a) as checkedProductCount,  
+                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
 
                                        yw_mxd_yhsqd.yjckrq as outDate, 
                                        yw_mxd_yhsqd.yhrq as checkDate,
@@ -324,7 +351,7 @@ namespace checkproduct.Service
          * 获取产品信息
          * 
          */
-        public Product GetProductInfo(string ticketNo, string contractNo, string productNo, string spid)
+        public Product GetProductInfo(string ticketNo, string spid)
         {
             string sql = @"select yw_mxd_cmd_yh.mxdbh as ticketNo, 
                                   yw_mxd_cmd_yh.bzjs as totalCount, 
@@ -334,11 +361,14 @@ namespace checkproduct.Service
                                   yw_mxd_cmd_yh.djtjms as boxSize, 
                                   yw_mxd_cmd_yh.mjmz as grossWeight, 
                                   yw_mxd_cmd_yh.mjjz as netWeight, 
-                                  yw_mxd_cmd_yh.yhms as checkMemo 
+                                  yw_mxd_cmd_yh.yhms as checkMemo,
+                                  CONVERT(nvarchar(100), yw_mxd_cmd_yh.yhrq, 120)  as checkTime,
+                                 (select top 1 lable from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh) as package,
+                                  (select top 1 spggms from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh) as description
                             from yw_mxd_cmd_yh, yw_mxd 
                                   where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and yw_mxd.bbh = yw_mxd_cmd_yh.bbh 
-                                            and sghth = '{0}' and sphh_kh = '{1}' and mxd_spid = '{2}' and yw_mxd.mxdbh = '{3}' ";
-            sql = string.Format(sql, contractNo, productNo, spid, ticketNo);
+                                            and mxd_spid = '{0}' and yw_mxd.mxdbh = '{1}' ";
+            sql = string.Format(sql, spid, ticketNo);
             logger.Debug("sql: " + sql);
 
             using (IDbConnection conn = ConnectionFactory.GetInstance())
@@ -347,12 +377,31 @@ namespace checkproduct.Service
 
                 if (product != null) {
                     //获取验货的图片
-                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}' and picture_describe = '{2}'  order by sqrq, picture_xz";
-                    sql = string.Format(sql, ticketNo, spid, contractNo);
+                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'  and imagetype = '{2}' order by sqrq, picture_xz";
+                    sql = string.Format(sql, ticketNo, spid, IMAGETYPE_CHECK);
                     logger.Debug("sql: " + sql);
                     var pictureUrls = conn.Query<string>(sql);
                     product.pictureUrls = pictureUrls.AsList<string>();
+
+                    //获取资料库的图片
+                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'  and imagetype = '{2}' order by sqrq, picture_xz";
+                    sql = string.Format(sql, ticketNo, spid, IMAGETYPE_ZLK);
+                    logger.Debug("sql: " + sql);
+                    var zlkUrls = conn.Query<string>(sql);
+                    product.zlkUrls = zlkUrls.AsList<string>();
+
+                    sql = @"select count(*) from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}' ";
+                    sql = string.Format(sql, spid);
+                    var fileCount = conn.QuerySingle<int>(sql);
+                    if (fileCount > 0)
+                    {
+                        List<string> productUrls = new List<string>();
+                        productUrls.Add("productpicture.aspx?id=" + spid);
+                        product.productUrls = productUrls;
+                    }
                 }
+
+                
                 return product;
             }
         }
@@ -370,8 +419,8 @@ namespace checkproduct.Service
             }
 
             //设置值
-            string sql = @"update yw_mxd_cmd_yh set bzjs_cy = '{0}', yhjg = '{1}', djtjms = '{2}', mjmz = '{3}', mjjz = '{4}', yhms = '{5}'
-                            where sghth = '{6}' and sphh_kh = '{7}' and mxd_spid = '{8}'";
+            string sql = @"update yw_mxd_cmd_yh set bzjs_cy = '{0}', yhjg = '{1}', djtjms = '{2}', mjmz = '{3}', mjjz = '{4}', yhms = '{5}',  yhrq = @checkTime
+                            where sghth = '{6}' and sphh_kh = '{7}' and mxd_spid = '{8}' ";
 
             sql = string.Format(sql, checkResult.pickCount, checkResult.checkResult, checkResult.boxSize, checkResult.grossWeight,
                 checkResult.netWeight, checkResult.checkMemo, contractNo, productNo, spid);
@@ -380,15 +429,15 @@ namespace checkproduct.Service
             //string spid = "";
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
-                conn.Execute(sql);
+                conn.Execute(sql, new { checkTime = DateTime.Now});
 
                 //设置图片
                 int seq = 0;
                 foreach (string url in checkResult.addImages)
                 {
-                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz, picture_describe)
-                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}', '{8}')";
-                    sql = string.Format(sql, ticketNo, 1, spid, DateTime.Now, url, url, "辅图", seq++, contractNo);
+                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz, picture_describe, imagetype)
+                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}', '{8}', '{9}')";
+                    sql = string.Format(sql, ticketNo, 1, spid, DateTime.Now, url, url, "辅图", seq++, contractNo, IMAGETYPE_CHECK);
                     logger.Debug("sql: " + sql);
 
                     conn.Execute(sql);
@@ -396,14 +445,14 @@ namespace checkproduct.Service
 
                 foreach (string url in checkResult.deleteImages)
                 {
-                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}' and mxd_spid = '{2}' ";
+                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}' and mxd_spid = '{2}' and imagetype = '{3}'";
                     int index = url.IndexOf("uploads/");
                     string fileName = url;
                     if (index != -1)
                     {
                         fileName = url.Substring(index + "uploads/".Length);
                     }
-                    sql = string.Format(sql, fileName, ticketNo, spid);
+                    sql = string.Format(sql, fileName, ticketNo, spid, IMAGETYPE_CHECK);
                     logger.Debug("sql: " + sql);
 
                     conn.Execute(sql);
@@ -437,9 +486,9 @@ namespace checkproduct.Service
                 int seq = 0;
                 foreach (string url in checkResult.addImages)
                 {
-                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz)
-                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}')";
-                    sql = string.Format(sql, ticketNo, 1, Special_SPID, DateTime.Now, url, url, "辅图", seq++);
+                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz, imagetype)
+                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}', '{8}')";
+                    sql = string.Format(sql, ticketNo, 1, Special_SPID, DateTime.Now, url, url, "辅图", seq++, IMAGETYPE_CHECK);
                     logger.Debug("sql: " + sql);
 
                     conn.Execute(sql);
@@ -447,14 +496,14 @@ namespace checkproduct.Service
 
                 foreach (string url in checkResult.deleteImages)
                 {
-                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}' and mxd_spid = '{2}' ";
+                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}' and mxd_spid = '{2}' and imagetype = '{3}' ";
                     int index = url.IndexOf("uploads/");
                     string fileName = url;
                     if (index != -1)
                     {
                         fileName = url.Substring(index + "uploads/".Length);
                     }
-                    sql = string.Format(sql, fileName, ticketNo, Special_SPID);
+                    sql = string.Format(sql, fileName, ticketNo, Special_SPID, IMAGETYPE_CHECK);
                     logger.Debug("sql: " + sql);
 
                     conn.Execute(sql);
@@ -462,6 +511,65 @@ namespace checkproduct.Service
 
 
                 return true;
+            }
+        }
+
+        /**
+         * 保存资料库的图片
+         * */
+        public bool SaveZiliaoKu(string ticketNo, string spid, string username,  List<string> addImages, List<string> deleteImages)
+        {
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                string sql = "";
+                //设置图片
+                int seq = 0;
+                foreach (string url in addImages)
+                {
+                    sql = @"insert into yw_mxd_yhmx_picture (mxdbh, bbh, mxd_spid, sqrq, picture_filepath, picture_sourcefile, picture_lx, picture_xz, imagetype)
+                        values ('{0}', '{1}', '{2}', '{3}', '{4}',  '{5}', '{6}', '{7}', '{8}')";
+                    sql = string.Format(sql, ticketNo, 1, spid, DateTime.Now, url, url, "辅图", seq++, IMAGETYPE_ZLK);
+                    logger.Debug("sql: " + sql);
+
+                    conn.Execute(sql);
+                }
+
+                foreach (string url in deleteImages)
+                {
+                    sql = @"delete from yw_mxd_yhmx_picture where picture_filepath = '{0}' and mxdbh = '{1}' and mxd_spid = '{2}' and  imagetype = '{3}'";
+                    int index = url.IndexOf("uploads/");
+                    string fileName = url;
+                    if (index != -1)
+                    {
+                        fileName = url.Substring(index + "uploads/".Length);
+                    }
+                    sql = string.Format(sql, fileName, ticketNo, spid, IMAGETYPE_ZLK);
+                    logger.Debug("sql: " + sql);
+
+                    conn.Execute(sql);
+                }
+
+
+                return true;
+            }
+        }
+
+        public byte[] GetProductImage(string sphh_kh)
+        {
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}' ";
+
+                sql = string.Format(sql, sphh_kh);
+                logger.Debug(sql);
+
+                byte[] image = conn.Query<byte[]>(sql).FirstOrDefault();
+                if (image == null || image.Length == 0)
+                {
+                    return new byte[0];
+                }
+
+                return image;
             }
         }
 
