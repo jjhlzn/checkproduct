@@ -362,6 +362,7 @@ namespace checkproduct.Service
                                   yw_mxd_cmd_yh.mjmz as grossWeight, 
                                   yw_mxd_cmd_yh.mjjz as netWeight, 
                                   yw_mxd_cmd_yh.yhms as checkMemo,
+                                  yw_mxd_cmd_yh.sphh_kh as sphh,
                                   CONVERT(nvarchar(100), yw_mxd_cmd_yh.yhrq, 120)  as checkTime,
                                  (select top 1 lable from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh) as package,
                                   (select top 1 spggms from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh) as description
@@ -391,12 +392,12 @@ namespace checkproduct.Service
                     product.zlkUrls = zlkUrls.AsList<string>();
 
                     sql = @"select count(*) from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}' ";
-                    sql = string.Format(sql, spid);
+                    sql = string.Format(sql, product.sphh);
                     var fileCount = conn.QuerySingle<int>(sql);
                     if (fileCount > 0)
                     {
                         List<string> productUrls = new List<string>();
-                        productUrls.Add("productpicture.aspx?id=" + spid);
+                        productUrls.Add("productpicture.aspx?id=" + product.sphh);
                         product.productUrls = productUrls;
                     }
                 }
