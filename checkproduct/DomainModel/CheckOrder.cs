@@ -14,7 +14,7 @@ namespace checkproduct.DomainModel
         public static string Status_Has_Checked = "已验货";
 
         public string ticketNo;
-        public string tracker;
+        public string tracker; //业务员
         public string checker;
         public string outDate;
         public string status;
@@ -41,7 +41,7 @@ namespace checkproduct.DomainModel
         public string ticketNo;
         public string contractNo;
         public string jinCangNo;
-        public string tracker;
+        public string tracker; //跟单员
         public string checker;
         public string deadlineDate;
         public int productCount;

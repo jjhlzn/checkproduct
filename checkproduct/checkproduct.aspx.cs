@@ -39,6 +39,10 @@ namespace checkproduct
             checkResult.grossWeight = Request.Params["grossWeight"];
             checkResult.netWeight = Request.Params["netWeight"];
             checkResult.checkMemo = Request.Params["checkMemo"];
+            if (checkResult.checkMemo == "null")
+            {
+                checkResult.checkMemo = "";
+            }
 
             logger.Debug("checker username: " + username);
             logger.Debug("checkResult: " + checkResult.ToString());

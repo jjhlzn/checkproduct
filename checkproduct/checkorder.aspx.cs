@@ -28,6 +28,10 @@ namespace checkproduct
                 checkResult.checkResult = "未完成";
             }
             checkResult.checkMemo = Request.Params["checkMemo"];
+            if (checkResult.checkMemo == "null")
+            {
+                checkResult.checkMemo = "";
+            }
 
             logger.Debug("checker username: " + username);
             logger.Debug("checkResult: " + checkResult.ToString());

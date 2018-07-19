@@ -40,7 +40,7 @@ namespace checkproduct.Service
             int skipCount = pageInfo.pageSize * pageInfo.pageNo;
             string whereClause = @"  ( yw_mxd.mxdbh = yw_mxd_yhsqd.mxdbh ) and  
                                      ( yw_mxd.bbh = yw_mxd_yhsqd.bbh ) and
-                                     ( yw_mxd.bb_flag = 'Y' ) ";
+                                     ( yw_mxd.bb_flag = 'Y' ) and (yw_mxd.zdrq between '" + startDate + "' and '" + endDate + "') ";
 
             whereClause += " and yw_mxd_yhsqd.yhfs = '我司验货' ";
 
@@ -65,10 +65,10 @@ namespace checkproduct.Service
                 whereClause += @" and (select COUNT(*) from (
                                 select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
-                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh) as a)
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a)
                               
                               > (select COUNT(distinct mxd_spid) from yw_mxd_yhmx_picture where  
-             yw_mxd_yhmx_picture.mxdbh = yw_mxd_yhsqd.mxdbh and imagetype = '"+IMAGETYPE_ZLK+"') ";
+             yw_mxd_yhmx_picture.mxdbh = yw_mxd_yhsqd.mxdbh and imagetype = '" + IMAGETYPE_ZLK+"') ";
 
             }
             else
@@ -95,26 +95,30 @@ namespace checkproduct.Service
             if ( !string.IsNullOrEmpty(keyword))
             {
                 whereClause
-                    += " and (yw_mxd.mxdbh  like '%" + keyword + "%' or yw_mxd_yhsqd.jcbh like '%" + keyword + @"%' or 
-                        (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) like  '%" + keyword + @"%'
-                    ) ";
+                    += " and ( ( yw_mxd.mxdbh + '###' + yw_mxd_yhsqd.jcbh ) like '%" + keyword + @"%'  
+                         or 
+                        (select COUNT(*) from rs_employee where e_no = yw_mxd_yhsqd.yhy and name like '%" + keyword + @"%')  > 0  
+                         or 
+                        ( (select COUNT(*) from yw_mxd_cmd_yh aa where aa.mxdbh = yw_mxd.mxdbh and aa.sphh_kh like '%" + keyword + @"%') > 0 )
+                      )";
             }
 
             string sql = "";
             
             sql = @"select top "+ pageInfo.pageSize + @" yw_mxd.mxdbh as ticketNo, yw_mxd_yhsqd.jcbh as jinCangNo, 
                             (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
-                            (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker,
+                            (select name from rs_employee where e_no in (select top 1 yw_bcontract.gdy from yw_bcontract where yw_bcontract.bb_flag='Y' 
+                                and yw_bcontract.sghth in (select aa.sghth from yw_mxd_cmd_yh aa where aa.mxdbh = yw_mxd.mxdbh and aa.bbh = yw_mxd.bbh  ))) as tracker,
                             
                             (select COUNT(*) from (
                                 select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
-                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh) as a) as productCount,
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a)  as productCount,
                                 
                             (select COUNT(*) from (
                                 select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
-                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
                             
 (select COUNT(distinct mxd_spid) from yw_mxd_yhmx_picture where  
              yw_mxd_yhmx_picture.mxdbh = yw_mxd_yhsqd.mxdbh and imagetype = '" + IMAGETYPE_ZLK + @"') as hasZlkImageProductCount,
@@ -177,9 +181,9 @@ namespace checkproduct.Service
             string sql = @"select distinct sghth as contractNo, 
 (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, 
             yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
-                            (select name from rs_employee where e_no in (select top 1 zdr from yw_mxd where mxdbh = '{0}' order by yw_mxd.bbh desc)) as tracker,
-   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth) as a) as productCount,
-   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and yhjg in ('合格', '不合格', '待定')) as a) as checkedProductCount
+                            (select name from rs_employee where e_no in (select top 1 yw_bcontract.gdy from yw_bcontract where yw_bcontract.bb_flag='Y' and yw_bcontract.sghth = yw_mxd_cmd_yh.sghth)) as tracker,
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and aa.bbh = yw_mxd.bbh) as a) as productCount,
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and yhjg in ('合格', '不合格', '待定') and aa.bbh = yw_mxd.bbh) as a) as checkedProductCount
                           from yw_mxd_cmd_yh, yw_mxd where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and yw_mxd.bb_flag = 'Y' and yw_mxd.mxdbh = '{0}'";
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
@@ -202,7 +206,9 @@ namespace checkproduct.Service
                             (select top 1 yhjg from yw_mxd_cmd_yh where mxd_spid = spid and sghth = '{0}' and mxdbh = '{1}') as checkResult
                            from (                         
                           select distinct mxd_spid as spid 
-                                                    from yw_mxd_cmd_yh where sghth = '{0}' and mxdbh = '{1}') as a";
+                             from yw_mxd_cmd_yh, yw_mxd where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and 
+                              yw_mxd_cmd_yh.bbh = yw_mxd.bbh and
+              yw_mxd_cmd_yh.sghth = '{0}' and yw_mxd.mxdbh = '{1}') as a";
             sql = string.Format(sql, contractNo, ticketNo);
             logger.Debug("sql: " + sql);
 
@@ -235,7 +241,7 @@ namespace checkproduct.Service
            where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and  yw_mxd.bb_flag = 'Y' 
             and mxd_spid in (                         
   select distinct mxd_spid as spid 
-                            from yw_mxd_cmd_yh where yw_mxd.bb_flag = 'Y'  and mxdbh = '{0}') ";
+                            from yw_mxd_cmd_yh where mxdbh = '{0}') ";
 
             if (checkResult != "全部")
             {
@@ -268,12 +274,12 @@ namespace checkproduct.Service
                                        (select COUNT(*) from (
                                             select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                                         select distinct sghth as contractNo 
-                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh) as a) as productCount,
+                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a) as productCount,
                                 
                                         (select COUNT(*) from (
                                             select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                                         select distinct sghth as contractNo 
-                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
+                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
 
                                        yw_mxd_yhsqd.yjckrq as outDate, 
                                        yw_mxd_yhsqd.yhrq as checkDate,
@@ -290,7 +296,7 @@ namespace checkproduct.Service
                 if (checkOrder != null)
                 {
                     //获取验货的图片
-                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'   order by sqrq, picture_xz";
+                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'   order by sqrq,  CAST(picture_xz AS INT)";
                     sql = string.Format(sql,  ticketNo, Special_SPID);
                     logger.Debug("sql: " + sql);
                     var pictureUrls = conn.Query<string>(sql);
@@ -319,7 +325,7 @@ namespace checkproduct.Service
             CheckOrderContract contract = new CheckOrderContract();
 
             string sql = @"select yw_mxd.mxdbh as ticketNo, 
-                                 (select name from rs_employee where e_no = yw_mxd.zdr) as tracker, 
+                                  (select name from rs_employee where e_no in (select top 1 yw_bcontract.gdy from yw_bcontract where yw_bcontract.bb_flag='Y' and yw_bcontract.sghth = '"+ contractNo + @"')) as tracker, 
                                  (select name from rs_employee where e_no = yw_mxd_yhsqd.yhy) as checker, 
                                   yw_mxd_yhsqd.jcbh as jinCangNo, 
                                   yjckrq as deadlineDate 
@@ -358,7 +364,7 @@ namespace checkproduct.Service
                                   yw_mxd_cmd_yh.mxd_spid as spid, 
                                   yw_mxd_cmd_yh.bzjs_cy as pickCount, 
                                   yw_mxd_cmd_yh.yhjg as checkResult, 
-                                  yw_mxd_cmd_yh.djtjms as boxSize, 
+                                  yw_mxd_cmd_yh.djtjms_yh as boxSize, 
                                   yw_mxd_cmd_yh.mjmz as grossWeight, 
                                   yw_mxd_cmd_yh.mjjz as netWeight, 
                                   yw_mxd_cmd_yh.yhms as checkMemo,
@@ -378,14 +384,14 @@ namespace checkproduct.Service
 
                 if (product != null) {
                     //获取验货的图片
-                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'  and imagetype = '{2}' order by sqrq, picture_xz";
+                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'  and imagetype = '{2}' order by sqrq,  CAST(picture_xz AS INT)";
                     sql = string.Format(sql, ticketNo, spid, IMAGETYPE_CHECK);
                     logger.Debug("sql: " + sql);
                     var pictureUrls = conn.Query<string>(sql);
                     product.pictureUrls = pictureUrls.AsList<string>();
 
                     //获取资料库的图片
-                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'  and imagetype = '{2}' order by sqrq, picture_xz";
+                    sql = @"select picture_sourcefile from yw_mxd_yhmx_picture where mxdbh = '{0}'  and mxd_spid = '{1}'  and imagetype = '{2}' order by sqrq,  CAST(picture_xz AS INT)";
                     sql = string.Format(sql, ticketNo, spid, IMAGETYPE_ZLK);
                     logger.Debug("sql: " + sql);
                     var zlkUrls = conn.Query<string>(sql);
@@ -420,7 +426,7 @@ namespace checkproduct.Service
             }
 
             //设置值
-            string sql = @"update yw_mxd_cmd_yh set bzjs_cy = '{0}', yhjg = '{1}', djtjms = '{2}', mjmz = '{3}', mjjz = '{4}', yhms = '{5}',  yhrq = @checkTime
+            string sql = @"update yw_mxd_cmd_yh set bzjs_cy = '{0}', yhjg = '{1}', djtjms_yh = '{2}', mjmz = '{3}', mjjz = '{4}', yhms = '{5}',  yhrq = @checkTime
                             where sghth = '{6}' and sphh_kh = '{7}' and mxd_spid = '{8}' ";
 
             sql = string.Format(sql, checkResult.pickCount, checkResult.checkResult, checkResult.boxSize, checkResult.grossWeight,
@@ -602,7 +608,7 @@ namespace checkproduct.Service
                                     yhjg as checkResult, 
                                     COUNT(*) as checkCount 
                                from (select distinct yw_mxd_cmd_yh.mxdbh, yw_mxd_cmd_yh.sghth, mxd_spid, yw_mxd_cmd_yh.yhjg from yw_mxd_cmd_yh, yw_mxd
-                                      where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh 
+                                      where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd_cmd_yh.bbh = yw_mxd.bbh
 											and yw_mxd.mxdbh in " + ordersStr + @"
 											and  bb_flag = 'Y') as a group by yhjg, mxdbh, sghth) as b group by ticketNo, checkResult";
 

@@ -39,7 +39,9 @@ namespace checkproduct
             pageInfo.pageNo = int.Parse(pageNo);
             pageInfo.pageSize = int.Parse(pageSize);
 
-            GetCheckOrdersResult checkOrdersResult = checkOrderService.GetCheckOrders(DateTime.Now, DateTime.Now, status, username,checker, pageInfo, ticketNo);
+            GetCheckOrdersResult checkOrdersResult = checkOrderService.GetCheckOrders(DateTime.ParseExact(startDate, "yyyy-MM-dd",
+                                       System.Globalization.CultureInfo.InvariantCulture), DateTime.ParseExact(endDate, "yyyy-MM-dd",
+                                       System.Globalization.CultureInfo.InvariantCulture), status, username,checker, pageInfo, ticketNo);
 
             var resp = new
             {
