@@ -182,8 +182,8 @@ namespace checkproduct.Service
 (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, 
             yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
                             (select name from rs_employee where e_no in (select top 1 yw_bcontract.gdy from yw_bcontract where yw_bcontract.bb_flag='Y' and yw_bcontract.sghth = yw_mxd_cmd_yh.sghth)) as tracker,
-   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and aa.bbh = yw_mxd.bbh) as a) as productCount,
-   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and yhjg in ('合格', '不合格', '待定') and aa.bbh = yw_mxd.bbh) as a) as checkedProductCount
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and aa.bbh = yw_mxd.bbh and  aa.mxdbh = yw_mxd.mxdbh) as a) as productCount,
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and yhjg in ('合格', '不合格', '待定') and aa.bbh = yw_mxd.bbh and aa.mxdbh = yw_mxd.mxdbh ) as a) as checkedProductCount
                           from yw_mxd_cmd_yh, yw_mxd where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and yw_mxd.bb_flag = 'Y' and yw_mxd.mxdbh = '{0}'";
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
