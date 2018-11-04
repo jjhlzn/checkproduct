@@ -72,6 +72,7 @@
   <ItemGroup>
     <Content Include="assignchecker.aspx" />
     <Content Include="checkorder.aspx" />
+    <Content Include="clearproductcheckresult.aspx" />
     <Content Include="checkproduct.aspx" />
     <Content Include="getallcheckers.aspx" />
     <Content Include="getcheckfile.aspx" />
@@ -97,6 +98,13 @@
     </Compile>
     <Compile Include="assignchecker.aspx.designer.cs">
       <DependentUpon>assignchecker.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="clearproductcheckresult.aspx.cs">
+      <DependentUpon>clearproductcheckresult.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="clearproductcheckresult.aspx.designer.cs">
+      <DependentUpon>clearproductcheckresult.aspx</DependentUpon>
     </Compile>
     <Compile Include="other\BasePage.cs" />
     <Compile Include="checkorder.aspx.cs">

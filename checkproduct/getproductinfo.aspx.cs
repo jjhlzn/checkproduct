@@ -26,7 +26,7 @@ namespace checkproduct
 
             logger.Debug(string.Format("ticketNo = {0}, contractNo = {1}, productNo = {2}, spid = {3}", ticketNo, contractNo, productNo, spid));
 
-            Product product = checkOrderService.GetProductInfo(ticketNo, spid);
+            Product product = checkOrderService.GetProductInfo(ticketNo, contractNo, spid);
               
             /*
             List<string> urls = new List<string>();

@@ -13,10 +13,10 @@
       <publishTime>01/23/2018 21:35:25</publishTime>
     </File>
     <File Include="bin/checkproduct.dll">
-      <publishTime>07/19/2018 15:25:30</publishTime>
+      <publishTime>10/31/2018 12:35:55</publishTime>
     </File>
     <File Include="bin/checkproduct.pdb">
-      <publishTime>07/19/2018 15:25:30</publishTime>
+      <publishTime>10/31/2018 12:35:55</publishTime>
     </File>
     <File Include="bin/Dapper.dll">
       <publishTime>07/22/2016 14:52:40</publishTime>
@@ -32,6 +32,9 @@
     </File>
     <File Include="checkproduct.aspx">
       <publishTime>12/19/2017 14:28:57</publishTime>
+    </File>
+    <File Include="clearproductcheckresult.aspx">
+      <publishTime>08/30/2018 09:15:05</publishTime>
     </File>
     <File Include="data.txt">
       <publishTime>12/19/2017 14:28:57</publishTime>

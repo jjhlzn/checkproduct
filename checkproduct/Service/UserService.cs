@@ -210,7 +210,13 @@ namespace checkproduct.Service
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
                 var checkers = conn.Query<User>(sql);
-                return checkers.AsList<User>();
+                
+                List<User> list = checkers.AsList<User>();
+                User user = new User();
+                user.username = "";
+                user.name = "空";
+                list.Add(user);
+                return list;
             }
         }
     }

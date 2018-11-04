@@ -62,10 +62,10 @@ namespace checkproduct.Service
             }
             else if (status == CheckOrder.Status_All)
             {
-                whereClause += @" and (select COUNT(*) from (
+                whereClause += @" and (yw_mxd_yhsqd.yhy is null or yw_mxd_yhsqd.yhy = '') and (select COUNT(*) from (
                                 select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
-                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a)
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and (aa.mj_flag != 'Y' or aa.mj_flag is null) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a)
                               
                               > (select COUNT(distinct mxd_spid) from yw_mxd_yhmx_picture where  
              yw_mxd_yhmx_picture.mxdbh = yw_mxd_yhsqd.mxdbh and imagetype = '" + IMAGETYPE_ZLK+"') ";
@@ -113,12 +113,12 @@ namespace checkproduct.Service
                             (select COUNT(*) from (
                                 select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
-                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a)  as productCount,
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and (aa.mj_flag != 'Y' or aa.mj_flag is null) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a)  as productCount,
                                 
                             (select COUNT(*) from (
                                 select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                             select distinct sghth as contractNo 
-                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
+                              from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and (aa.mj_flag != 'Y' or aa.mj_flag is null) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
                             
 (select COUNT(distinct mxd_spid) from yw_mxd_yhmx_picture where  
              yw_mxd_yhmx_picture.mxdbh = yw_mxd_yhsqd.mxdbh and imagetype = '" + IMAGETYPE_ZLK + @"') as hasZlkImageProductCount,
@@ -182,8 +182,8 @@ namespace checkproduct.Service
 (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, 
             yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
                             (select name from rs_employee where e_no in (select top 1 yw_bcontract.gdy from yw_bcontract where yw_bcontract.bb_flag='Y' and yw_bcontract.sghth = yw_mxd_cmd_yh.sghth)) as tracker,
-   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and aa.bbh = yw_mxd.bbh and  aa.mxdbh = yw_mxd.mxdbh) as a) as productCount,
-   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and yhjg in ('合格', '不合格', '待定') and aa.bbh = yw_mxd.bbh and aa.mxdbh = yw_mxd.mxdbh ) as a) as checkedProductCount
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and (aa.mj_flag != 'Y' or aa.mj_flag is null) and aa.bbh = yw_mxd.bbh and  aa.mxdbh = yw_mxd.mxdbh) as a) as productCount,
+   (select COUNT(*) from (select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth = yw_mxd_cmd_yh.sghth and (aa.mj_flag != 'Y' or aa.mj_flag is null) and yhjg in ('合格', '不合格', '待定') and aa.bbh = yw_mxd.bbh and aa.mxdbh = yw_mxd.mxdbh ) as a) as checkedProductCount
                           from yw_mxd_cmd_yh, yw_mxd where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and yw_mxd.bb_flag = 'Y' and yw_mxd.mxdbh = '{0}'";
             sql = string.Format(sql, ticketNo);
             logger.Debug("sql: " + sql);
@@ -207,7 +207,7 @@ namespace checkproduct.Service
                            from (                         
                           select distinct mxd_spid as spid 
                              from yw_mxd_cmd_yh, yw_mxd where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and 
-                              yw_mxd_cmd_yh.bbh = yw_mxd.bbh and
+                              yw_mxd_cmd_yh.bbh = yw_mxd.bbh and  (yw_mxd_cmd_yh.mj_flag != 'Y' or yw_mxd_cmd_yh.mj_flag is null) and 
               yw_mxd_cmd_yh.sghth = '{0}' and yw_mxd.mxdbh = '{1}') as a";
             sql = string.Format(sql, contractNo, ticketNo);
             logger.Debug("sql: " + sql);
@@ -238,7 +238,7 @@ namespace checkproduct.Service
             (select name from rs_employee where e_no in (select top 1 yhy from yw_mxd_yhsqd, yw_mxd as aa where yw_mxd_yhsqd.mxdbh = aa.mxdbh and aa.bb_flag = 'Y' and aa.mxdbh = yw_mxd.mxdbh order by yw_mxd_yhsqd.bbh desc)) as checker,
             (select top 1 name from rs_employee where e_no = yw_mxd.zdr) as tracker
            from yw_mxd_cmd_yh, yw_mxd
-           where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and  yw_mxd.bb_flag = 'Y' 
+           where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.mxdbh = '{0}' and yw_mxd_cmd_yh.bbh = yw_mxd.bbh and  yw_mxd.bb_flag = 'Y' and  (yw_mxd_cmd_yh.mj_flag != 'Y' or yw_mxd_cmd_yh.mj_flag is null) 
             and mxd_spid in (                         
   select distinct mxd_spid as spid 
                             from yw_mxd_cmd_yh where mxdbh = '{0}') ";
@@ -274,12 +274,12 @@ namespace checkproduct.Service
                                        (select COUNT(*) from (
                                             select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                                         select distinct sghth as contractNo 
-                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a) as productCount,
+                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh) and  (aa.mj_flag != 'Y' or aa.mj_flag is null)  and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh) as a) as productCount,
                                 
                                         (select COUNT(*) from (
                                             select distinct sghth, mxd_spid  from yw_mxd_cmd_yh aa where sghth in (
                                         select distinct sghth as contractNo 
-                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh ) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
+                                          from yw_mxd_cmd_yh where mxdbh = yw_mxd_yhsqd.mxdbh )  and  (aa.mj_flag != 'Y' or aa.mj_flag is null) and aa.mxdbh = yw_mxd_yhsqd.mxdbh and aa.bbh = yw_mxd.bbh and aa.yhjg in ('合格','不合格', '待定')) as a) as checkedProductCount,  
 
                                        yw_mxd_yhsqd.yjckrq as outDate, 
                                        yw_mxd_yhsqd.yhrq as checkDate,
@@ -357,7 +357,7 @@ namespace checkproduct.Service
          * 获取产品信息
          * 
          */
-        public Product GetProductInfo(string ticketNo, string spid)
+        public Product GetProductInfo(string ticketNo, string contractNo, string spid)
         {
             string sql = @"select yw_mxd_cmd_yh.mxdbh as ticketNo, 
                                   yw_mxd_cmd_yh.bzjs as totalCount, 
@@ -374,8 +374,9 @@ namespace checkproduct.Service
                                   (select top 1 spggms from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh) as description
                             from yw_mxd_cmd_yh, yw_mxd 
                                   where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and yw_mxd.bbh = yw_mxd_cmd_yh.bbh 
-                                            and mxd_spid = '{0}' and yw_mxd.mxdbh = '{1}' ";
-            sql = string.Format(sql, spid, ticketNo);
+                                            and mxd_spid = '{0}' and yw_mxd.mxdbh = '{1}' 
+                                        and yw_mxd_cmd_yh.wxhth in (select wxhth from yw_mxd_cmd where  mxdbh = '{1}' and mxd_spid = '{0}' and sghth = '{2}')";
+            sql = string.Format(sql, spid, ticketNo, contractNo);
             logger.Debug("sql: " + sql);
 
             using (IDbConnection conn = ConnectionFactory.GetInstance())
@@ -468,6 +469,32 @@ namespace checkproduct.Service
                 return true;
             }
            
+        }
+
+        public bool ClearProductCheckResult(string ticketNo, string contractNo, string productNo, string spid)
+        {
+
+            //设置值
+            string sql = @"update yw_mxd_cmd_yh set bzjs_cy = '', yhjg = '', djtjms_yh = '', yhms = '',  yhrq = ''
+                            where sghth = '{0}' and sphh_kh = '{1}' and mxd_spid = '{2}' ";
+
+            sql = string.Format(sql,contractNo, productNo, spid);
+            logger.Debug("sql: " + sql);
+
+            //string spid = "";
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+                conn.Execute(sql, new { checkTime = DateTime.Now });
+
+                sql = @"delete from yw_mxd_yhmx_picture where  mxdbh = '{0}' and mxd_spid = '{1}' and imagetype = '{2}'";
+  
+                sql = string.Format(sql, ticketNo, spid, IMAGETYPE_CHECK);
+                logger.Debug("sql: " + sql);
+
+                conn.Execute(sql);
+
+            }
+           return true;
         }
 
 

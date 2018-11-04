@@ -10,7 +10,7 @@
 namespace checkproduct {
     
     
-    public partial class checkproduct {
+    public partial class clearproductcheckresult {
         
         /// <summary>
         /// form1 控件。
