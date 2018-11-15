@@ -162,8 +162,8 @@ namespace checkproduct.Service
         */ 
         public bool AssignChecker(string ticketNo, string checker)
         {
-            string sql = "update yw_mxd_yhsqd set yhy = '{0}' where mxdbh = '{1}'";
-            sql = string.Format(sql, checker, ticketNo);
+            string sql = "update yw_mxd_yhsqd set yhy = '{0}', fprq = '{1}'  where mxdbh = '{2}'";
+            sql = string.Format(sql, checker, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), ticketNo);
             logger.Debug("sql: " + sql);
 
             using (IDbConnection conn = ConnectionFactory.GetInstance())
