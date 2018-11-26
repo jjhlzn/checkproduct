@@ -14,7 +14,8 @@ namespace checkproduct
         protected void Page_Load(object sender, EventArgs e)
         {
             string sphh_kh = Request.Params["id"];
-            byte[] image = new CheckOrderService().GetProductImage(sphh_kh);
+            string ticketNo = Request.Params["ticketNo"];
+            byte[] image = new CheckOrderService().GetProductImage(ticketNo, sphh_kh);
             Response.ContentType = "image";
             Response.OutputStream.Write(image, 0, image.Length);
         }

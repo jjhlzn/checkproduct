@@ -371,7 +371,7 @@ namespace checkproduct.Service
                                   yw_mxd_cmd_yh.sphh_kh as sphh,
                                   CONVERT(nvarchar(100), yw_mxd_cmd_yh.yhrq, 120)  as checkTime,
                                  (select top 1 lable from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh) as package,
-                                  (select top 1 spggms from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh) as description
+                                  (select top 1 spggms from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh and sphh = yw_mxd_cmd_yh.sphh) as description
                             from yw_mxd_cmd_yh, yw_mxd 
                                   where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and yw_mxd.bbh = yw_mxd_cmd_yh.bbh 
                                             and mxd_spid = '{0}' and yw_mxd.mxdbh = '{1}' 
@@ -404,7 +404,7 @@ namespace checkproduct.Service
                     if (fileCount > 0)
                     {
                         List<string> productUrls = new List<string>();
-                        productUrls.Add("productpicture.aspx?id=" + product.sphh);
+                        productUrls.Add("productpicture.aspx?id=" + product.sphh + "&ticketNo=" + ticketNo);
                         product.productUrls = productUrls;
                     }
                 }
@@ -588,13 +588,14 @@ namespace checkproduct.Service
             }
         }
 
-        public byte[] GetProductImage(string sphh_kh)
+        public byte[] GetProductImage(string ticketNo, string sphh_kh)
         {
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
-                string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}' ";
+                string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
+                                and kh_spbm like (select top 1 sphh from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' ) + '%'";
 
-                sql = string.Format(sql, sphh_kh);
+                sql = string.Format(sql, sphh_kh, ticketNo, sphh_kh);
                 logger.Debug(sql);
 
                 byte[] image = conn.Query<byte[]>(sql).FirstOrDefault();
