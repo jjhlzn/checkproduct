@@ -13,10 +13,10 @@
       <publishTime>01/23/2018 21:35:25</publishTime>
     </File>
     <File Include="bin/checkproduct.dll">
-      <publishTime>11/26/2018 19:20:38</publishTime>
+      <publishTime>12/20/2018 19:22:51</publishTime>
     </File>
     <File Include="bin/checkproduct.pdb">
-      <publishTime>11/26/2018 19:20:38</publishTime>
+      <publishTime>12/20/2018 19:22:51</publishTime>
     </File>
     <File Include="bin/Dapper.dll">
       <publishTime>07/22/2016 14:52:40</publishTime>

@@ -95,7 +95,8 @@ namespace checkproduct.Service
             if ( !string.IsNullOrEmpty(keyword))
             {
                 whereClause
-                    += " and ( ( yw_mxd.mxdbh + '###' + yw_mxd_yhsqd.jcbh ) like '%" + keyword + @"%'  
+                    += " and (  yw_mxd.mxdbh  like '%" + keyword + @"%'  
+                            or  yw_mxd_yhsqd.jcbh  like '%" + keyword + @"%'
                          or 
                         (select COUNT(*) from rs_employee where e_no = yw_mxd_yhsqd.yhy and name like '%" + keyword + @"%')  > 0  
                          or 
@@ -593,7 +594,8 @@ namespace checkproduct.Service
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
                 string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
-                                and kh_spbm like (select top 1 sphh from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' ) + '%'";
+                                and kh_spbm like (select top 1 sphh from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' ) + '%'"
+                                + @" and yw_spbm in (select top 1 spbm from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' )";
 
                 sql = string.Format(sql, sphh_kh, ticketNo, sphh_kh);
                 logger.Debug(sql);
@@ -601,7 +603,18 @@ namespace checkproduct.Service
                 byte[] image = conn.Query<byte[]>(sql).FirstOrDefault();
                 if (image == null || image.Length == 0)
                 {
-                    return new byte[0];
+                    sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
+                                and kh_spbm like (select top 1 sphh from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' ) + '%'";
+
+                    sql = string.Format(sql, sphh_kh, ticketNo, sphh_kh);
+                    logger.Debug(sql);
+
+                    image = conn.Query<byte[]>(sql).FirstOrDefault();
+                    if  (image == null || image.Length == 0)
+                    {
+                        return new byte[0];
+                    }
+                           
                 }
 
                 return image;
