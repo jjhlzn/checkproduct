@@ -56,6 +56,7 @@ namespace checkproduct.DomainModel
         public string spid;
         public string productNo;
         public string sphh; //客户货号
+        public string spbm;
         public string name;
         public string totalCount = "0"; //总箱数
         public string pickCount; //抽箱数

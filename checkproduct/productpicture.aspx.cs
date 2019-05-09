@@ -15,7 +15,8 @@ namespace checkproduct
         {
             string sphh_kh = Request.Params["id"];
             string ticketNo = Request.Params["ticketNo"];
-            byte[] image = new CheckOrderService().GetProductImage(ticketNo, sphh_kh);
+            string spbm = Request.Params["spbm"];
+            byte[] image = new CheckOrderService().GetProductImage(ticketNo, sphh_kh, spbm);
             Response.ContentType = "image";
             Response.OutputStream.Write(image, 0, image.Length);
         }

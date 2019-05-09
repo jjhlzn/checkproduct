@@ -370,13 +370,14 @@ namespace checkproduct.Service
                                   yw_mxd_cmd_yh.mjjz as netWeight, 
                                   yw_mxd_cmd_yh.yhms as checkMemo,
                                   yw_mxd_cmd_yh.sphh_kh as sphh,
+                                    yw_mxd_cmd_yh.spbm as spbm,
                                   CONVERT(nvarchar(100), yw_mxd_cmd_yh.yhrq, 120)  as checkTime,
                                  (select top 1 lable from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh) as package,
                                   (select top 1 spggms from yw_commodity_kh where sphh_kh = yw_mxd_cmd_yh.sphh_kh and sphh = yw_mxd_cmd_yh.sphh) as description
                             from yw_mxd_cmd_yh, yw_mxd 
                                   where yw_mxd_cmd_yh.mxdbh = yw_mxd.mxdbh and yw_mxd.bb_flag = 'Y' and yw_mxd.bbh = yw_mxd_cmd_yh.bbh 
-                                            and mxd_spid = '{0}' and yw_mxd.mxdbh = '{1}' 
-                                        and yw_mxd_cmd_yh.wxhth in (select wxhth from yw_mxd_cmd where  mxdbh = '{1}' and mxd_spid = '{0}' and sghth = '{2}')";
+                                            and mxd_spid = '{0}' and yw_mxd.mxdbh = '{1}' and sghth = '{2}'";
+                                       // and yw_mxd_cmd_yh.wxhth in (select wxhth from yw_mxd_cmd where  mxdbh = '{1}' and mxd_spid = '{0}' and sghth = '{2}')";
             sql = string.Format(sql, spid, ticketNo, contractNo);
             logger.Debug("sql: " + sql);
 
@@ -399,13 +400,18 @@ namespace checkproduct.Service
                     var zlkUrls = conn.Query<string>(sql);
                     product.zlkUrls = zlkUrls.AsList<string>();
 
-                    sql = @"select count(*) from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}' ";
-                    sql = string.Format(sql, product.sphh);
+
+                    //sql = @"select count(*) from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}' ";
+
+                    sql = @" select count(*) from nbxhw_add.dbo.yw_commodity_kh_picture where kh_spbm in (select kh_spbm from yw_commodity_kh where yw_spbm = '{0}' and sphh_kh = '{1}')";
+                    sql = string.Format(sql, product.spbm, product.sphh);
+                    
+                    logger.Debug("sql: " + sql);
                     var fileCount = conn.QuerySingle<int>(sql);
                     if (fileCount > 0)
                     {
                         List<string> productUrls = new List<string>();
-                        productUrls.Add("productpicture.aspx?id=" + product.sphh + "&ticketNo=" + ticketNo);
+                        productUrls.Add("productpicture.aspx?id=" + product.sphh + "&spbm=" + product.spbm + "&ticketNo=" + ticketNo);
                         product.productUrls = productUrls;
                     }
                 }
@@ -589,8 +595,33 @@ namespace checkproduct.Service
             }
         }
 
-        public byte[] GetProductImage(string ticketNo, string sphh_kh)
+        public byte[] GetProductImage(string ticketNo, string sphh_kh, string spbm)
         {
+            using (IDbConnection conn = ConnectionFactory.GetInstance())
+            {
+               // string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
+                //                and kh_spbm like (select top 1 sphh from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' ) + '%'"
+                 //               + @" and yw_spbm in (select top 1 spbm from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' )";
+
+               string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture 
+where kh_spbm in (select kh_spbm from yw_commodity_kh where yw_spbm = '{0}' and sphh_kh = '{1}')";
+
+                sql = string.Format(sql, spbm, sphh_kh);
+                logger.Debug(sql);
+
+                byte[] image = conn.Query<byte[]>(sql).FirstOrDefault();
+                if (image == null || image.Length == 0)
+                {
+                    
+                     return new byte[0];
+                    
+
+                }
+
+                return image;
+            }
+
+            /*
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
                 string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
@@ -618,7 +649,7 @@ namespace checkproduct.Service
                 }
 
                 return image;
-            }
+            } */
         }
 
         /*********************** private method *******************/
