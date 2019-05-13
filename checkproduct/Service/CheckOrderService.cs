@@ -401,9 +401,9 @@ namespace checkproduct.Service
                     product.zlkUrls = zlkUrls.AsList<string>();
 
 
-                    //sql = @"select count(*) from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}' ";
+                    //sql = @"select count(*) from nbhr_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}' ";
 
-                    sql = @" select count(*) from nbxhw_add.dbo.yw_commodity_kh_picture where kh_spbm in (select kh_spbm from yw_commodity_kh where yw_spbm = '{0}' and sphh_kh = '{1}')";
+                    sql = @" select count(*) from nbhr_add.dbo.yw_commodity_kh_picture where kh_spbm in (select kh_spbm from yw_commodity_kh where yw_spbm = '{0}' and sphh_kh = '{1}')";
                     sql = string.Format(sql, product.spbm, product.sphh);
                     
                     logger.Debug("sql: " + sql);
@@ -599,11 +599,11 @@ namespace checkproduct.Service
         {
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
-               // string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
+               // string sql = @"select top 1 picture_file from nbhr_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
                 //                and kh_spbm like (select top 1 sphh from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' ) + '%'"
                  //               + @" and yw_spbm in (select top 1 spbm from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' )";
 
-               string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture 
+               string sql = @"select top 1 picture_file from nbhr_add.dbo.yw_commodity_kh_picture 
 where kh_spbm in (select kh_spbm from yw_commodity_kh where yw_spbm = '{0}' and sphh_kh = '{1}')";
 
                 sql = string.Format(sql, spbm, sphh_kh);
@@ -624,7 +624,7 @@ where kh_spbm in (select kh_spbm from yw_commodity_kh where yw_spbm = '{0}' and 
             /*
             using (IDbConnection conn = ConnectionFactory.GetInstance())
             {
-                string sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
+                string sql = @"select top 1 picture_file from nbhr_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
                                 and kh_spbm like (select top 1 sphh from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' ) + '%'"
                                 + @" and yw_spbm in (select top 1 spbm from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' )";
 
@@ -634,7 +634,7 @@ where kh_spbm in (select kh_spbm from yw_commodity_kh where yw_spbm = '{0}' and 
                 byte[] image = conn.Query<byte[]>(sql).FirstOrDefault();
                 if (image == null || image.Length == 0)
                 {
-                    sql = @"select top 1 picture_file from nbxhw_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
+                    sql = @"select top 1 picture_file from nbhr_add.dbo.yw_commodity_kh_picture where sphh_kh = '{0}'  
                                 and kh_spbm like (select top 1 sphh from yw_mxd_cmd_yh where mxdbh = '{1}' and sphh_kh = '{2}' ) + '%'";
 
                     sql = string.Format(sql, sphh_kh, ticketNo, sphh_kh);
